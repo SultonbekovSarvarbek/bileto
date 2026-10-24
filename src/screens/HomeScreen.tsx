@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -34,7 +34,10 @@ export default function HomeScreen() {
     <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ paddingTop: insets.top + space(2), paddingBottom: 120 }}>
       <View style={st.header}>
         <View>
-          <Text style={st.logo}>bilet<Text style={{ color: colors.accent }}>o</Text></Text>
+          <View style={st.brand}>
+            <Image source={require('../../assets/logo-mark.png')} style={st.mark} />
+            <Text style={st.logo}>bilet<Text style={{ color: colors.accent }}>o</Text></Text>
+          </View>
           <Pressable onPress={() => setCityOpen(true)} style={st.cityBtn}>
             <Ionicons name="location" size={14} color={colors.accent} />
             <Text style={st.cityText}>{cityName}</Text>
@@ -93,6 +96,8 @@ export default function HomeScreen() {
 
 const st = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: space(4) },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  mark: { width: 36, height: 25, resizeMode: 'contain' },
   logo: { color: colors.text, fontSize: 26, fontWeight: '900', letterSpacing: -0.5 },
   cityBtn: { flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 4 },
   cityText: { color: colors.textDim, fontSize: 14, fontWeight: '600' },
