@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { EVENTS, LISTINGS, Listing, Event, SELLERS, VENUES, CITIES } from './data';
-import { colors } from './theme';
+import type { ImageSourcePropType } from 'react-native';
 import { DEFAULT_LANG, DICTS, Dict, Lang, setCurrentLang } from './i18n';
 
 // Что показывать в шапке объявления: данные события, если оно привязано, иначе название от продавца.
-export type ListingView = { title: string; emoji: string; color: string; date?: string; venue?: string; eventId?: string };
+export type ListingView = { title: string; image?: ImageSourcePropType; date?: string; venue?: string; eventId?: string };
 
 // Заявка на покупку: уходит операторам, дальше сделку ведёт оператор (оплата — вне приложения).
 export type Role = 'buyer' | 'seller';
@@ -76,13 +76,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setRequests((prev) => [{ ...r, id: 'r' + Date.now(), date: new Date().toISOString(), status: 'processing' }, ...prev]),
     getEvent: (id) => EVENTS.find((e) => e.id === id),
     getVenue: (id) => VENUES.find((v) => v.id === id),
-    getSeller: (id) => SELLERS.find((s) => s.id === id),
+    getSeller: (id) => {
+      const s = SELLERS.find((x) => x.id === id);
+      // Текущий пользователь — продавец 'me': имя и телефон из регистрации.
+      return s && id === 'me' && user ? { ...s, name: user.name, phone: user.phone } : s;
+    },
     activeListingsFor: (eventId) =>
       listings.filter((l) => l.eventId === eventId && l.status === 'active').sort((a, b) => a.price - b.price),
     listingView: (l) => {
       const e = l.eventId ? EVENTS.find((x) => x.id === l.eventId) : undefined;
-      if (!e) return { title: l.title ?? '', emoji: '🎟️', color: colors.surface2 };
-      return { title: e.title, emoji: e.emoji, color: e.color, date: e.date, venue: VENUES.find((v) => v.id === e.venueId)?.name, eventId: e.id };
+      if (!e) return { title: l.title ?? '' };
+      return { title: e.title, image: e.image, date: e.date, venue: VENUES.find((v) => v.id === e.venueId)?.name, eventId: e.id };
     },
   }), [lang, user, city, listings, favorites, requests]);
 

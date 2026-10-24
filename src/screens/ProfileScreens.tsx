@@ -9,7 +9,7 @@ import { ListingStatus } from '../data';
 import { Role, useStore } from '../store';
 import { LANGS } from '../i18n';
 import { Badge, Button, Chip, Empty } from '../components/ui';
-import { EventRow, ListingRow } from '../components/cards';
+import { Cover, EventRow, ListingRow } from '../components/cards';
 import { confirm, notify } from './ListingScreen';
 import { RegisterForm } from '../components/RegisterForm';
 import type { RootStackParamList, ScreenProps } from '../navigation';
@@ -69,7 +69,7 @@ export function ProfileTab() {
             {me.verified && <Ionicons name="shield-checkmark" size={18} color={colors.green} />}
           </View>
           <Text style={st.phone}>{formatPhone(user.phone)}</Text>
-          <Text style={st.phone}>★ {me.rating.toFixed(1)} · {t.common.deals(me.deals)}</Text>
+          {me.deals > 0 && <Text style={st.phone}>★ {me.rating.toFixed(1)} · {t.common.deals(me.deals)}</Text>}
         </View>
       </View>
 
@@ -182,13 +182,10 @@ export function PurchasesScreen({ navigation }: ScreenProps<'Purchases'>) {
         const e = listingView(l);
         return (
           <View style={st.ticket}>
-            <View style={[st.ticketTop, { backgroundColor: e.color }]}>
-              <Text style={{ fontSize: 30 }}>{e.emoji}</Text>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={st.ticketTitle} numberOfLines={2}>{e.title}</Text>
-                {e.date && <Text style={st.ticketMeta}>{formatDate(e.date)}</Text>}
-              </View>
-            </View>
+            <Cover image={e.image} style={st.ticketTop}>
+              <Text style={st.ticketTitle} numberOfLines={2}>{e.title}</Text>
+              {e.date && <Text style={st.ticketMeta}>{formatDate(e.date)}</Text>}
+            </Cover>
             <View style={st.ticketBody}>
               {e.venue && <Text style={st.ticketInfo}>{e.venue}</Text>}
               <Text style={st.ticketInfo}>{l.sector}{l.row ? `, ${t.common.rowLower(l.row)}` : ''} · {t.common.pcs(item.qty)}</Text>
@@ -263,8 +260,8 @@ const st = StyleSheet.create({
   listingMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: space(5), marginTop: -space(2), marginBottom: space(4) },
   metaText: { color: colors.textMuted, fontSize: 12 },
   ticket: { borderRadius: radius.lg, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, marginBottom: space(4) },
-  ticketTop: { flexDirection: 'row', alignItems: 'center', padding: space(4) },
-  ticketTitle: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  ticketTop: { aspectRatio: 16 / 9 },
+  ticketTitle: { color: '#fff', fontSize: 16, fontWeight: '800', textShadowColor: '#000000AA', textShadowRadius: 6 },
   ticketMeta: { color: '#ffffffcc', fontSize: 13, marginTop: 2 },
   ticketBody: { padding: space(4) },
   ticketInfo: { color: colors.textDim, fontSize: 14, marginBottom: 4 },

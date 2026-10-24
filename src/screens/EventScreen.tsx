@@ -33,7 +33,7 @@ export default function EventScreen({ route, navigation }: ScreenProps<'Event'>)
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={{ padding: space(4) }}>
-          <EventCover event={event} height={200} big />
+          <EventCover event={event} height={200} />
           {event.soldOut && <View style={{ marginTop: space(4) }}><Badge text={t.event.boxSoldOut} color={colors.red} /></View>}
           <Text style={st.title}>{event.title}</Text>
           <Info icon="calendar-outline" text={formatDate(event.date)} />

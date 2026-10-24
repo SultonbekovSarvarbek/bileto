@@ -8,6 +8,7 @@ import { useStore } from '../store';
 import { tr } from '../i18n';
 import { Badge, Button, Card, Empty } from '../components/ui';
 import { RequestSheet } from '../components/RequestSheet';
+import { Cover } from '../components/cards';
 import type { ScreenProps } from '../navigation';
 
 export const notify = (title: string, msg?: string) =>
@@ -33,14 +34,17 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={{ padding: space(4), paddingBottom: 160 }}>
-        <Pressable disabled={!v.eventId} onPress={() => v.eventId && navigation.navigate('Event', { id: v.eventId })} style={[st.eventHead, { backgroundColor: v.color }]}>
-          <Text style={{ fontSize: 40 }}>{v.emoji}</Text>
-          <View style={{ flex: 1, marginLeft: space(3) }}>
-            <Text style={st.eventTitle} numberOfLines={2}>{v.title}</Text>
-            {v.date && <Text style={st.eventMeta}>{formatDate(v.date)}</Text>}
-            {v.venue && <Text style={st.eventMeta}>{v.venue}</Text>}
-          </View>
-          {v.eventId && <Ionicons name="chevron-forward" size={20} color="#fff" />}
+        <Pressable disabled={!v.eventId} onPress={() => v.eventId && navigation.navigate('Event', { id: v.eventId })}>
+          <Cover image={v.image} style={st.eventHead}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+              <View style={{ flex: 1 }}>
+                <Text style={st.eventTitle} numberOfLines={2}>{v.title}</Text>
+                {v.date && <Text style={st.eventMeta}>{formatDate(v.date)}</Text>}
+                {v.venue && <Text style={st.eventMeta}>{v.venue}</Text>}
+              </View>
+              {v.eventId && <Ionicons name="chevron-forward" size={20} color="#fff" />}
+            </View>
+          </Cover>
         </Pressable>
 
         <Card style={{ marginTop: space(4) }}>
@@ -141,9 +145,9 @@ function Cell({ label, value }: { label: string; value: string }) {
 }
 
 const st = StyleSheet.create({
-  eventHead: { flexDirection: 'row', alignItems: 'center', padding: space(4), borderRadius: radius.lg },
-  eventTitle: { color: '#fff', fontSize: 17, fontWeight: '800' },
-  eventMeta: { color: '#ffffffcc', fontSize: 13, marginTop: 2 },
+  eventHead: { aspectRatio: 16 / 9, borderRadius: radius.lg },
+  eventTitle: { color: '#fff', fontSize: 18, fontWeight: '800', textShadowColor: '#000000AA', textShadowRadius: 6 },
+  eventMeta: { color: '#ffffffdd', fontSize: 13, marginTop: 2, textShadowColor: '#000000AA', textShadowRadius: 6 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sector: { color: colors.text, fontSize: 22, fontWeight: '900' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: space(3) },
