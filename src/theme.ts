@@ -1,3 +1,5 @@
+import { tr } from './i18n';
+
 export const colors = {
   bg: '#0E0F13',
   surface: '#17191F',
@@ -17,19 +19,25 @@ export const radius = { sm: 8, md: 14, lg: 20, xl: 28 };
 export const space = (n: number) => n * 4;
 
 export const formatPrice = (n: number) =>
-  n.toLocaleString('ru-RU').replace(/,/g, ' ') + ' сум';
-
-const MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+  n.toLocaleString('ru-RU').replace(/,/g, ' ') + ' ' + tr().currency;
 
 export const formatDate = (iso: string) => {
   const d = new Date(iso);
   const hh = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${WEEKDAYS[d.getDay()]} · ${hh}:${mm}`;
+  const { months, weekdays } = tr();
+  return `${d.getDate()} ${months[d.getMonth()]}, ${weekdays[d.getDay()]} · ${hh}:${mm}`;
 };
 
-export const formatShortDate = (iso: string) => {
-  const d = new Date(iso);
-  return { day: String(d.getDate()), month: MONTHS[d.getMonth()] };
+// "+998 90 123-45-67" / "901234567" → "+998901234567"; null, если номер неполный.
+export const normalizePhone = (input: string) => {
+  const digits = input.replace(/\D/g, '');
+  const full = digits.length === 9 ? '998' + digits : digits;
+  return /^998\d{9}$/.test(full) ? '+' + full : null;
 };
+
+// "+998901234567" → "+998 90 123-45-67"
+export const formatPhone = (p: string) => `${p.slice(0, 4)} ${p.slice(4, 6)} ${p.slice(6, 9)}-${p.slice(9, 11)}-${p.slice(11)}`;
+
+// Номер продавца покупателю виден только размытым: связь — через оператора.
+export const maskPhone = (p: string) => `${p.slice(0, 4)} ${p.slice(4, 6)} ••• •• ${p.slice(-2)}`;

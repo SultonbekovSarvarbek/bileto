@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, formatDate, formatPrice, radius, space } from '../theme';
+import { colors, formatDate, formatPrice, maskPhone, radius, space } from '../theme';
 import { SERVICE_FEE } from '../data';
 import { useStore } from '../store';
+import { tr } from '../i18n';
 import { Badge, Button, Card, Empty } from '../components/ui';
-import { markupInfo } from '../components/cards';
+import { RequestSheet } from '../components/RequestSheet';
 import type { ScreenProps } from '../navigation';
 
 export const notify = (title: string, msg?: string) =>
@@ -14,55 +15,51 @@ export const notify = (title: string, msg?: string) =>
 
 export const confirm = (title: string, msg: string, onYes: () => void) => {
   if (Platform.OS === 'web') { if (window.confirm(`${title}\n\n${msg}`)) onYes(); return; }
-  Alert.alert(title, msg, [{ text: 'Отмена', style: 'cancel' }, { text: 'Да', style: 'destructive', onPress: onYes }]);
+  Alert.alert(title, msg, [{ text: tr().common.cancel, style: 'cancel' }, { text: tr().common.yes, style: 'destructive', onPress: onYes }]);
 };
 
 export default function ListingScreen({ route, navigation }: ScreenProps<'Listing'>) {
   const insets = useSafeAreaInsets();
-  const { listings, getEvent, getVenue, getSeller, user, updateListing, removeListing } = useStore();
+  const { listings, listingView, getSeller, updateListing, removeListing, t } = useStore();
   const listing = listings.find((l) => l.id === route.params.id);
-  const [qty, setQty] = useState(1);
+  const [buying, setBuying] = useState(false);
 
-  if (!listing) return <Empty icon="alert-circle" title="Объявление удалено" />;
-  const event = getEvent(listing.eventId)!;
-  const venue = getVenue(event.venueId);
+  if (!listing) return <Empty icon="alert-circle" title={t.listing.deleted} />;
+  const v = listingView(listing);
   const seller = getSeller(listing.sellerId);
   const mine = listing.sellerId === 'me';
-  const m = markupInfo(listing);
-  const subtotal = listing.price * qty;
-  const fee = Math.round(subtotal * SERVICE_FEE);
+  const fee = Math.round(listing.price * SERVICE_FEE);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={{ padding: space(4), paddingBottom: 160 }}>
-        <Pressable onPress={() => navigation.navigate('Event', { id: event.id })} style={[st.eventHead, { backgroundColor: event.color }]}>
-          <Text style={{ fontSize: 40 }}>{event.emoji}</Text>
+        <Pressable disabled={!v.eventId} onPress={() => v.eventId && navigation.navigate('Event', { id: v.eventId })} style={[st.eventHead, { backgroundColor: v.color }]}>
+          <Text style={{ fontSize: 40 }}>{v.emoji}</Text>
           <View style={{ flex: 1, marginLeft: space(3) }}>
-            <Text style={st.eventTitle} numberOfLines={2}>{event.title}</Text>
-            <Text style={st.eventMeta}>{formatDate(event.date)}</Text>
-            <Text style={st.eventMeta}>{venue?.name}</Text>
+            <Text style={st.eventTitle} numberOfLines={2}>{v.title}</Text>
+            {v.date && <Text style={st.eventMeta}>{formatDate(v.date)}</Text>}
+            {v.venue && <Text style={st.eventMeta}>{v.venue}</Text>}
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#fff" />
+          {v.eventId && <Ionicons name="chevron-forward" size={20} color="#fff" />}
         </Pressable>
 
         <Card style={{ marginTop: space(4) }}>
           <View style={st.rowBetween}>
             <Text style={st.sector}>{listing.sector}</Text>
-            {listing.status !== 'active' && <Badge text={listing.status === 'sold' ? 'Продано' : 'Резерв'} color={colors.textDim} />}
+            {listing.status !== 'active' && <Badge text={listing.status === 'sold' ? t.common.sold : t.listing.reserved} color={colors.textDim} />}
           </View>
           <View style={st.grid}>
-            <Cell label="Ряд" value={listing.row ?? '—'} />
-            <Cell label="Места" value={listing.seats ?? '—'} />
-            <Cell label="Доступно" value={`${listing.qty} шт.`} />
-            <Cell label="Тип" value={listing.ticketType === 'electronic' ? 'Электронный' : 'Бумажный'} />
+            <Cell label={t.listing.row} value={listing.row ?? '—'} />
+            <Cell label={t.listing.seats} value={listing.seats ?? '—'} />
+            <Cell label={t.listing.available} value={t.common.pcs(listing.qty)} />
+            <Cell label={t.listing.transfer} value={t.common[listing.delivery]} />
           </View>
           <View style={st.divider} />
           <View style={st.rowBetween}>
             <View>
               <Text style={st.price}>{formatPrice(listing.price)}</Text>
-              <Text style={st.nominal}>за билет · номинал {formatPrice(listing.nominal)}</Text>
+              <Text style={st.nominal}>{t.listing.perTicket}</Text>
             </View>
-            <Badge text={m.text} color={m.color} />
           </View>
           {listing.comment ? <Text style={st.comment}>«{listing.comment}»</Text> : null}
         </Card>
@@ -72,32 +69,32 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View style={st.avatar}><Text style={st.avatarText}>{seller?.name[0]}</Text></View>
               <View style={{ marginLeft: space(3) }}>
-                <Text style={st.sellerName}>{mine ? 'Вы' : seller?.name}</Text>
-                <Text style={st.sellerMeta}>★ {seller?.rating.toFixed(1)} · {seller?.deals} сделок · с {seller?.since}</Text>
+                <Text style={st.sellerName}>{mine ? t.listing.you : seller?.name}</Text>
+                {seller && <Text style={st.sellerMeta}>{t.listing.sellerMeta(seller.rating.toFixed(1), seller.deals, seller.since)}</Text>}
               </View>
             </View>
-            {seller?.verified && <Badge text="Проверен" color={colors.green} />}
+            {seller?.verified && <Badge text={t.listing.verified} color={colors.green} />}
           </View>
+          {seller && !mine && (
+            <View style={st.phoneRow}>
+              <Ionicons name="call-outline" size={16} color={colors.textDim} />
+              <View style={{ marginLeft: 10, flex: 1 }}>
+                <Text style={st.phoneMasked}>{maskPhone(seller.phone)}</Text>
+                <Text style={st.phoneHint}>{t.listing.phoneHidden}</Text>
+              </View>
+              <Ionicons name="lock-closed" size={14} color={colors.textMuted} />
+            </View>
+          )}
         </Card>
 
         <View style={st.safe}>
           <Ionicons name="shield-checkmark" size={22} color={colors.green} />
           <Text style={st.safeText}>
-            <Text style={{ fontWeight: '800', color: colors.text }}>Безопасная сделка. </Text>
-            Деньги замораживаются и уходят продавцу только после того, как билет передан вам и проверен. Если билет не пришёл — полный возврат.
+            <Text style={{ fontWeight: '800', color: colors.text }}>{t.listing.safeTitle}</Text>
+            {t.listing.safeText}
           </Text>
         </View>
 
-        {!mine && listing.status === 'active' && listing.qty > 1 && (
-          <View style={[st.rowBetween, { marginTop: space(4) }]}>
-            <Text style={st.qtyLabel}>Количество</Text>
-            <View style={st.stepper}>
-              <Pressable onPress={() => setQty((q) => Math.max(1, q - 1))} style={st.stepBtn}><Ionicons name="remove" size={20} color={colors.text} /></Pressable>
-              <Text style={st.qty}>{qty}</Text>
-              <Pressable onPress={() => setQty((q) => Math.min(listing.qty, q + 1))} style={st.stepBtn}><Ionicons name="add" size={20} color={colors.text} /></Pressable>
-            </View>
-          </View>
-        )}
       </ScrollView>
 
       <View style={[st.bottom, { paddingBottom: insets.bottom + space(3) }]}>
@@ -105,36 +102,29 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
           <View style={{ flexDirection: 'row', gap: 10 }}>
             {listing.status === 'active' && (
               <>
-                <Button style={{ flex: 1 }} title="Изменить" variant="secondary" icon="create-outline" onPress={() => navigation.navigate('Sell', { editId: listing.id })} />
-                <Button style={{ flex: 1 }} title="Продано" variant="secondary" icon="checkmark-done" onPress={() => updateListing(listing.id, { status: 'sold' })} />
+                <Button style={{ flex: 1 }} title={t.common.edit} variant="secondary" icon="create-outline" onPress={() => navigation.navigate('Sell', { editId: listing.id })} />
+                <Button style={{ flex: 1 }} title={t.common.sold} variant="secondary" icon="checkmark-done" onPress={() => updateListing(listing.id, { status: 'sold' })} />
               </>
             )}
             <Button
               style={{ flex: listing.status === 'active' ? 0 : 1, paddingHorizontal: 16 }}
-              title={listing.status === 'active' ? '' : 'Удалить'}
+              title={listing.status === 'active' ? '' : t.listing.delete}
               variant="danger"
               icon="trash-outline"
-              onPress={() => confirm('Удалить объявление?', 'Это действие нельзя отменить', () => { removeListing(listing.id); navigation.goBack(); })}
+              onPress={() => confirm(t.listing.deleteQ, t.listing.deleteText, () => { removeListing(listing.id); navigation.goBack(); })}
             />
           </View>
         ) : listing.status === 'active' ? (
           <>
             <View style={[st.rowBetween, { marginBottom: 10 }]}>
-              <Text style={st.totalLabel}>Итого с сервисным сбором {Math.round(SERVICE_FEE * 100)}%</Text>
-              <Text style={st.total}>{formatPrice(subtotal + fee)}</Text>
+              <Text style={st.totalLabel}>{t.listing.totalWithFee(Math.round(SERVICE_FEE * 100))}</Text>
+              <Text style={st.total}>{formatPrice(listing.price + fee)}</Text>
             </View>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <Button title="" variant="secondary" icon="chatbubble-ellipses-outline" style={{ paddingHorizontal: 16 }} onPress={() => notify('Чат с продавцом', 'Здесь будет переписка внутри приложения. Контакты не раскрываются до оплаты.')} />
-              <Button
-                style={{ flex: 1 }}
-                title="Купить"
-                icon="lock-closed"
-                onPress={() => (user ? navigation.navigate('Checkout', { id: listing.id, qty }) : navigation.navigate('Login'))}
-              />
-            </View>
+            <Button title={t.listing.buy} icon="cart-outline" onPress={() => setBuying(true)} />
+            <RequestSheet listing={listing} visible={buying} onClose={() => setBuying(false)} />
           </>
         ) : (
-          <Button title="Билеты уже проданы" disabled />
+          <Button title={t.listing.alreadySold} disabled />
         )}
       </View>
     </View>
@@ -170,10 +160,9 @@ const st = StyleSheet.create({
   sellerMeta: { color: colors.textDim, fontSize: 12, marginTop: 2 },
   safe: { flexDirection: 'row', marginTop: space(3), padding: space(4), borderRadius: radius.lg, backgroundColor: '#12291F', borderWidth: 1, borderColor: '#1E4634' },
   safeText: { color: colors.textDim, fontSize: 13, lineHeight: 19, marginLeft: 10, flex: 1 },
-  qtyLabel: { color: colors.text, fontSize: 16, fontWeight: '700' },
-  stepper: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
-  stepBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  qty: { color: colors.text, fontSize: 17, fontWeight: '800', minWidth: 28, textAlign: 'center' },
+  phoneRow: { flexDirection: 'row', alignItems: 'center', marginTop: space(3), paddingTop: space(3), borderTopWidth: 1, borderTopColor: colors.border },
+  phoneMasked: { color: colors.text, fontSize: 16, fontWeight: '700', letterSpacing: 1 },
+  phoneHint: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
   bottom: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: space(4), backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border },
   totalLabel: { color: colors.textDim, fontSize: 13 },
   total: { color: colors.text, fontSize: 18, fontWeight: '900' },

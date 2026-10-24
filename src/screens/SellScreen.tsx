@@ -1,12 +1,13 @@
-import React, { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useState } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { colors, formatDate, formatPrice, radius, space } from '../theme';
-import { CATEGORIES, MAX_MARKUP, TicketType } from '../data';
+import { colors, formatPrice, radius, space } from '../theme';
+import { Delivery, SELLER_COMMISSION, SERVICE_FEE } from '../data';
 import { useStore } from '../store';
 import { Button, Chip, Field } from '../components/ui';
+import { RegisterForm } from '../components/RegisterForm';
 import { notify } from './ListingScreen';
 import type { ScreenProps } from '../navigation';
 
@@ -16,55 +17,49 @@ const pretty = (s: string) => (onlyDigits(s) ? Number(onlyDigits(s)).toLocaleStr
 
 export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
   const insets = useSafeAreaInsets();
-  const { events, getVenue, addListing, updateListing, listings, user, city } = useStore();
+  const { getEvent, listingView, addListing, updateListing, listings, user, t, setRole } = useStore();
   const editing = route.params?.editId ? listings.find((l) => l.id === route.params!.editId) : undefined;
 
-  const [eventId, setEventId] = useState<string | undefined>(editing?.eventId ?? route.params?.eventId);
-  const [eventQuery, setEventQuery] = useState('');
-  const [catFilter, setCatFilter] = useState<string>('all');
+  // Со страницы события объявление привязывается к нему, а название подставляется.
+  const eventId = editing ? editing.eventId : route.params?.eventId;
+  const [title, setTitle] = useState(editing ? listingView(editing).title : (eventId && getEvent(eventId)?.title) || '');
   const [sector, setSector] = useState(editing?.sector ?? '');
   const [row, setRow] = useState(editing?.row ?? '');
   const [seats, setSeats] = useState(editing?.seats ?? '');
   const [qty, setQty] = useState(editing?.qty ?? 1);
-  const [ticketType, setTicketType] = useState<TicketType>(editing?.ticketType ?? 'electronic');
-  const [nominal, setNominal] = useState(editing ? String(editing.nominal) : '');
+  const [delivery, setDelivery] = useState<Delivery>(editing?.delivery ?? 'delivery');
   const [price, setPrice] = useState(editing ? String(editing.price) : '');
-  const [comment, setComment] = useState(editing?.comment ?? '');
   const [proof, setProof] = useState<string | null>(editing ? 'existing' : null);
   const [agree, setAgree] = useState(!!editing);
   const [tried, setTried] = useState(false);
 
-  const event = events.find((e) => e.id === eventId);
-  const pickable = useMemo(
-    () =>
-      events.filter((e) => {
-        if (getVenue(e.venueId)?.city !== city) return false;
-        if (catFilter !== 'all' && e.category !== catFilter) return false;
-        const q = eventQuery.trim().toLowerCase();
-        return !q || e.title.toLowerCase().includes(q);
-      }),
-    [events, city, catFilter, eventQuery, getVenue],
-  );
-
+  // Продать билет можно только после регистрации и только в роли продавца.
   if (!user) {
     return (
+      <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ padding: space(6) }} keyboardShouldPersistTaps="handled">
+        <RegisterForm defaultRole="seller" />
+      </ScrollView>
+    );
+  }
+  if (user.role !== 'seller') {
+    return (
       <View style={{ flex: 1, backgroundColor: colors.bg, padding: space(6), justifyContent: 'center' }}>
-        <Text style={st.h1}>Войдите, чтобы продать билет</Text>
-        <Button title="Войти по номеру телефона" onPress={() => navigation.replace('Login')} style={{ marginTop: space(6) }} />
+        <Text style={st.h1}>{t.sell.sellerOnly}</Text>
+        <Text style={st.gateText}>{t.sell.sellerOnlyText}</Text>
+        <Button title={t.sell.becomeSeller} icon="pricetags-outline" onPress={() => setRole('seller')} style={{ marginTop: space(6) }} />
       </View>
     );
   }
 
-  const nominalN = num(nominal);
   const priceN = num(price);
-  const maxPrice = Math.round(nominalN * (1 + MAX_MARKUP));
+  const commission = Math.round(priceN * qty * SELLER_COMMISSION);
+  const buyerFee = Math.round(priceN * qty * SERVICE_FEE);
   const errors = {
-    event: !eventId ? 'Выберите событие' : '',
-    sector: !sector.trim() ? 'Укажите сектор или зону' : '',
-    nominal: !nominalN ? 'Укажите цену, указанную на билете' : '',
-    price: !priceN ? 'Укажите вашу цену' : nominalN && priceN > maxPrice ? `Максимум ${formatPrice(maxPrice)} (номинал +${MAX_MARKUP * 100}%)` : '',
-    proof: !proof ? 'Загрузите фото или скрин билета — его увидит только модератор' : '',
-    agree: !agree ? 'Нужно согласие с правилами' : '',
+    title: !title.trim() ? t.sell.errTitle : '',
+    proof: !proof ? t.sell.errProof : '',
+    sector: !sector.trim() ? t.sell.errSector : '',
+    price: !priceN ? t.sell.errPrice : '',
+    agree: !agree ? t.sell.errAgree : '',
   };
   const valid = Object.values(errors).every((e) => !e);
 
@@ -76,16 +71,16 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
   const submit = () => {
     setTried(true);
     if (!valid) {
-      notify('Проверьте форму', Object.values(errors).filter(Boolean)[0]);
+      notify(t.sell.checkForm, Object.values(errors).filter(Boolean)[0]);
       return;
     }
-    const payload = { eventId: eventId!, sector: sector.trim(), row: row.trim() || undefined, seats: seats.trim() || undefined, qty, nominal: nominalN, price: priceN, ticketType, comment: comment.trim() || undefined };
+    const payload = { eventId, title: title.trim(), sector: sector.trim(), row: row.trim() || undefined, seats: seats.trim() || undefined, qty, price: priceN, delivery };
     if (editing) {
       updateListing(editing.id, payload);
       navigation.goBack();
     } else {
       const created = addListing(payload);
-      navigation.replace('Done', { kind: 'listed', id: created.id });
+      navigation.replace('Done', { id: created.id });
     }
   };
 
@@ -94,50 +89,35 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView contentContainerStyle={{ padding: space(4), paddingBottom: 140 }} keyboardShouldPersistTaps="handled">
-        {/* 1. Событие */}
-        <Step n={1} title="Событие" />
-        {event ? (
-          <Pressable onPress={() => !editing && setEventId(undefined)} style={[st.selected, { borderColor: event.color }]}>
-            <View style={[st.selThumb, { backgroundColor: event.color }]}><Text style={{ fontSize: 26 }}>{event.emoji}</Text></View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={st.selTitle} numberOfLines={2}>{event.title}</Text>
-              <Text style={st.selMeta}>{formatDate(event.date)} · {getVenue(event.venueId)?.name}</Text>
-            </View>
-            {!editing && <Text style={st.change}>Изменить</Text>}
-          </Pressable>
-        ) : (
-          <>
-            <View style={st.search}>
-              <Ionicons name="search" size={18} color={colors.textMuted} />
-              <TextInput value={eventQuery} onChangeText={setEventQuery} placeholder="Найти событие" placeholderTextColor={colors.textMuted} style={st.searchInput} />
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: space(3) }}>
-              <Chip label="Все" active={catFilter === 'all'} onPress={() => setCatFilter('all')} />
-              {CATEGORIES.map((c) => <Chip key={c.id} label={c.title} active={catFilter === c.id} onPress={() => setCatFilter(c.id)} />)}
-            </ScrollView>
-            {pickable.map((e) => (
-              <Pressable key={e.id} onPress={() => setEventId(e.id)} style={st.pickRow}>
-                <Text style={{ fontSize: 22, marginRight: 10 }}>{e.emoji}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={st.pickTitle} numberOfLines={1}>{e.title}</Text>
-                  <Text style={st.selMeta}>{formatDate(e.date)}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-              </Pressable>
-            ))}
-            {!pickable.length && <Text style={st.hint}>Не нашли событие? Напишите в поддержку — добавим за 15 минут.</Text>}
-            {!!err('event') && <Text style={st.error}>{err('event')}</Text>}
-          </>
-        )}
+        {/* 1. Название */}
+        <Step n={1} title={t.sell.stepTitle} />
+        <Field label={t.sell.title} value={title} onChangeText={setTitle} placeholder={t.sell.titlePh} error={err('title')} />
 
-        {/* 2. Билет */}
-        <Step n={2} title="Данные билета" />
-        <Field label="Сектор / зона *" value={sector} onChangeText={setSector} placeholder="Напр. Партер, Танцпол, VIP A" error={err('sector')} />
+        {/* 2. Фото */}
+        <Step n={2} title={t.sell.stepPhoto} />
+        <Pressable onPress={pickProof} style={[st.upload, !!err('proof') && { borderColor: colors.red }]}>
+          {proof && proof !== 'existing' ? (
+            <Image source={{ uri: proof }} style={st.proofImg} />
+          ) : proof === 'existing' ? (
+            <><Ionicons name="checkmark-circle" size={28} color={colors.green} /><Text style={st.uploadText}>{t.sell.proofDone}</Text></>
+          ) : (
+            <>
+              <Ionicons name="camera-outline" size={28} color={colors.accent} />
+              <Text style={st.uploadText}>{t.sell.upload}</Text>
+              <Text style={st.hint}>{t.sell.uploadHint}</Text>
+            </>
+          )}
+        </Pressable>
+        {!!err('proof') && <Text style={[st.error, { marginTop: -space(2), marginBottom: space(2) }]}>{err('proof')}</Text>}
+
+        {/* 3. Место */}
+        <Step n={3} title={t.sell.stepSeat} />
+        <Field label={t.sell.sector} value={sector} onChangeText={setSector} placeholder={t.sell.sectorPh} error={err('sector')} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          <View style={{ flex: 1 }}><Field label="Ряд" value={row} onChangeText={setRow} placeholder="—" /></View>
-          <View style={{ flex: 1 }}><Field label="Места" value={seats} onChangeText={setSeats} placeholder="12–13" /></View>
+          <View style={{ flex: 1 }}><Field label={t.listing.row} value={row} onChangeText={setRow} placeholder="—" /></View>
+          <View style={{ flex: 1 }}><Field label={t.listing.seats} value={seats} onChangeText={setSeats} placeholder="12–13" /></View>
         </View>
-        <Text style={st.label}>Количество билетов</Text>
+        <Text style={st.label}>{t.sell.qty}</Text>
         <View style={st.qtyRow}>
           {[1, 2, 3, 4, 5, 6].map((n) => (
             <Pressable key={n} onPress={() => setQty(n)} style={[st.qtyBox, qty === n && st.qtyActive]}>
@@ -145,66 +125,37 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
             </Pressable>
           ))}
         </View>
-        <Text style={st.label}>Тип билета</Text>
-        <View style={{ flexDirection: 'row', marginBottom: space(4) }}>
-          <Chip label="Электронный" icon="qr-code-outline" active={ticketType === 'electronic'} onPress={() => setTicketType('electronic')} />
-          <Chip label="Бумажный" icon="document-outline" active={ticketType === 'paper'} onPress={() => setTicketType('paper')} />
+
+        {/* 4. Цена и передача */}
+        <Step n={4} title={t.sell.stepPrice} />
+        <Field label={t.sell.price} keyboardType="number-pad" value={pretty(price)} onChangeText={setPrice} placeholder="500 000" error={err('price')} />
+        <Text style={st.label}>{t.sell.transfer}</Text>
+        <View style={{ flexDirection: 'row' }}>
+          <Chip label={t.common.delivery} icon="bicycle-outline" active={delivery === 'delivery'} onPress={() => setDelivery('delivery')} />
+          <Chip label={t.common.pickup} icon="walk-outline" active={delivery === 'pickup'} onPress={() => setDelivery('pickup')} />
         </View>
-
-        {/* 3. Цена */}
-        <Step n={3} title="Цена" />
-        <Field label="Номинал (цена на билете), сум *" keyboardType="number-pad" value={pretty(nominal)} onChangeText={setNominal} placeholder="400 000" error={err('nominal')} />
-        <Field
-          label="Ваша цена за 1 билет, сум *"
-          keyboardType="number-pad"
-          value={pretty(price)}
-          onChangeText={setPrice}
-          placeholder="500 000"
-          error={err('price') || (nominalN && priceN > maxPrice ? errors.price : '')}
-          hint={nominalN ? `Не выше ${formatPrice(maxPrice)} (+${MAX_MARKUP * 100}% к номиналу)` : undefined}
-        />
-        {nominalN > 0 && (
-          <View style={st.quick}>
-            {[0, 0.1, 0.2, 0.3].map((p) => (
-              <Chip key={p} label={p === 0 ? 'По номиналу' : `+${p * 100}%`} active={priceN === Math.round(nominalN * (1 + p))} onPress={() => setPrice(String(Math.round(nominalN * (1 + p))))} />
-            ))}
-          </View>
-        )}
-        {priceN > 0 && (
-          <View style={st.earn}>
-            <Text style={st.earnLabel}>Вы получите</Text>
-            <Text style={st.earnValue}>{formatPrice(priceN * qty)}</Text>
-            <Text style={st.earnHint}>Комиссию сервиса платит покупатель. Выплата на карту после передачи билета.</Text>
-          </View>
-        )}
-
-        {/* 4. Подтверждение */}
-        <Step n={4} title="Подтверждение билета" />
-        <Pressable onPress={pickProof} style={[st.upload, !!err('proof') && { borderColor: colors.red }]}>
-          {proof && proof !== 'existing' ? (
-            <Image source={{ uri: proof }} style={st.proofImg} />
-          ) : proof === 'existing' ? (
-            <><Ionicons name="checkmark-circle" size={28} color={colors.green} /><Text style={st.uploadText}>Билет уже проверен</Text></>
-          ) : (
+        <Text style={[st.hint, { textAlign: 'left', marginBottom: space(4) }]}>{delivery === 'delivery' ? t.sell.deliveryHint : t.sell.pickupHint}</Text>
+        <View style={[st.earn, { marginBottom: space(4) }]}>
+          {priceN > 0 && (
             <>
-              <Ionicons name="cloud-upload-outline" size={28} color={colors.accent} />
-              <Text style={st.uploadText}>Загрузить фото / скрин билета</Text>
-              <Text style={st.hint}>Видит только модератор. QR-код можно закрыть.</Text>
+              <Text style={st.earnLabel}>{t.sell.youGet}</Text>
+              <Text style={st.earnValue}>{formatPrice(priceN * qty - commission)}</Text>
             </>
           )}
-        </Pressable>
-        {!!err('proof') && <Text style={st.error}>{err('proof')}</Text>}
-
-        <Field label="Комментарий" value={comment} onChangeText={setComment} placeholder="Почему продаёте, как передадите билет" multiline style={[st.textarea]} />
+          <Text style={[st.earnHint, !priceN && { marginTop: 0 }]}>
+            {t.sell.commissionNote(Math.round(SELLER_COMMISSION * 100), Math.round(SERVICE_FEE * 100))}
+          </Text>
+          {priceN > 0 && <Text style={st.earnHint}>{t.sell.commissionCalc(formatPrice(commission), formatPrice(buyerFee))}</Text>}
+        </View>
 
         <Pressable onPress={() => setAgree((v) => !v)} style={st.agree}>
           <Ionicons name={agree ? 'checkbox' : 'square-outline'} size={22} color={agree ? colors.accent : err('agree') ? colors.red : colors.textDim} />
-          <Text style={st.agreeText}>Билет настоящий, принадлежит мне и не будет продан повторно. Согласен с правилами безопасной сделки.</Text>
+          <Text style={st.agreeText}>{t.sell.agree}</Text>
         </Pressable>
       </ScrollView>
 
       <View style={[st.bottom, { paddingBottom: insets.bottom + space(3) }]}>
-        <Button title={editing ? 'Сохранить изменения' : 'Опубликовать объявление'} icon={editing ? 'save-outline' : 'megaphone-outline'} onPress={submit} />
+        <Button title={editing ? t.sell.save : t.sell.publish} icon={editing ? 'save-outline' : 'megaphone-outline'} onPress={submit} />
       </View>
     </View>
   );
@@ -220,20 +171,12 @@ function Step({ n, title }: { n: number; title: string }) {
 }
 
 const st = StyleSheet.create({
+  gateText: { color: colors.textDim, fontSize: 15, lineHeight: 22, textAlign: 'center', marginTop: space(3) },
   h1: { color: colors.text, fontSize: 24, fontWeight: '900', textAlign: 'center' },
   step: { flexDirection: 'row', alignItems: 'center', marginTop: space(4), marginBottom: space(3) },
   stepN: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
   stepNText: { color: colors.accentText, fontWeight: '900', fontSize: 13 },
   stepTitle: { color: colors.text, fontSize: 18, fontWeight: '800', marginLeft: 10 },
-  selected: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1.5, padding: space(3) },
-  selThumb: { width: 52, height: 52, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  selTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
-  selMeta: { color: colors.textDim, fontSize: 12, marginTop: 3 },
-  change: { color: colors.accent, fontWeight: '700', fontSize: 13, marginLeft: 8 },
-  search: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.md, paddingHorizontal: 14, height: 46, borderWidth: 1, borderColor: colors.border },
-  searchInput: { flex: 1, color: colors.text, fontSize: 15, marginLeft: 8, height: '100%' },
-  pickRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
-  pickTitle: { color: colors.text, fontSize: 15, fontWeight: '600' },
   hint: { color: colors.textMuted, fontSize: 12, marginTop: 6, textAlign: 'center' },
   error: { color: colors.red, fontSize: 12, marginTop: 6 },
   label: { color: colors.textDim, fontSize: 13, fontWeight: '600', marginBottom: 8 },
@@ -241,7 +184,6 @@ const st = StyleSheet.create({
   qtyBox: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
   qtyActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   qtyText: { color: colors.text, fontSize: 16, fontWeight: '800' },
-  quick: { flexDirection: 'row', flexWrap: 'wrap', marginTop: -space(2), marginBottom: space(3) },
   earn: { backgroundColor: '#12291F', borderColor: '#1E4634', borderWidth: 1, borderRadius: radius.lg, padding: space(4) },
   earnLabel: { color: colors.textDim, fontSize: 13 },
   earnValue: { color: colors.green, fontSize: 24, fontWeight: '900', marginTop: 2 },
@@ -249,7 +191,6 @@ const st = StyleSheet.create({
   upload: { height: 150, borderRadius: radius.lg, borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: space(4), overflow: 'hidden' },
   uploadText: { color: colors.text, fontSize: 15, fontWeight: '700', marginTop: 8 },
   proofImg: { width: '100%', height: '100%' },
-  textarea: { height: 96, paddingTop: 12, textAlignVertical: 'top' },
   agree: { flexDirection: 'row', alignItems: 'flex-start' },
   agreeText: { color: colors.textDim, fontSize: 13, lineHeight: 19, marginLeft: 10, flex: 1 },
   bottom: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: space(4), backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border },

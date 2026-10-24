@@ -1,29 +1,34 @@
 import React, { useState } from 'react';
-import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, radius, space } from '../theme';
-import { CATEGORIES, CITIES } from '../data';
+import { CITIES } from '../data';
 import { useStore } from '../store';
 import { SectionTitle } from '../components/ui';
-import { EventCardWide, ListingRow } from '../components/cards';
+import { ListingRow } from '../components/cards';
 import type { RootStackParamList } from '../navigation';
 
 export default function HomeScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
-  const { events, listings, city, setCity, getVenue } = useStore();
+  const { events, listings, city, setCity, getVenue, listingView, t } = useStore();
+  const cityName = t.cities[city] ?? city;
   const [cityOpen, setCityOpen] = useState(false);
   const [q, setQ] = useState('');
 
   const cityEvents = events.filter((e) => getVenue(e.venueId)?.city === city);
-  const hot = cityEvents.filter((e) => e.soldOut);
+  const query = q.trim().toLowerCase();
   const fresh = listings
-    .filter((l) => l.status === 'active' && l.sellerId !== 'me' && cityEvents.some((e) => e.id === l.eventId))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 5);
+    .filter((l) => l.status === 'active' && l.sellerId !== 'me' && (l.eventId ? cityEvents.some((e) => e.id === l.eventId) : l.city === city))
+    .filter((l) => {
+      if (!query) return true;
+      const v = listingView(l);
+      return [v.title, l.sector, v.venue].some((s) => s?.toLowerCase().includes(query));
+    })
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ paddingTop: insets.top + space(2), paddingBottom: 120 }}>
@@ -32,13 +37,13 @@ export default function HomeScreen() {
           <Text style={st.logo}>bilet<Text style={{ color: colors.accent }}>o</Text></Text>
           <Pressable onPress={() => setCityOpen(true)} style={st.cityBtn}>
             <Ionicons name="location" size={14} color={colors.accent} />
-            <Text style={st.cityText}>{city}</Text>
+            <Text style={st.cityText}>{cityName}</Text>
             <Ionicons name="chevron-down" size={14} color={colors.textDim} />
           </Pressable>
         </View>
         <Pressable onPress={() => nav.navigate('Sell')} style={st.sellBtn}>
           <Ionicons name="add" size={18} color={colors.accentText} />
-          <Text style={st.sellText}>Продать</Text>
+          <Text style={st.sellText}>{t.common.sellTicket}</Text>
         </Pressable>
       </View>
 
@@ -47,72 +52,35 @@ export default function HomeScreen() {
         <TextInput
           value={q}
           onChangeText={setQ}
-          placeholder="Артист, событие или площадка"
+          placeholder={t.home.search}
           placeholderTextColor={colors.textMuted}
           style={st.searchInput}
           returnKeyType="search"
-          onSubmitEditing={() => q.trim() && nav.navigate('Category', { id: 'all', query: q.trim() })}
+          clearButtonMode="while-editing"
         />
       </View>
 
       <View style={st.promo}>
         <View style={{ flex: 1 }}>
-          <Text style={st.promoTitle}>Не успели купить?</Text>
-          <Text style={st.promoText}>Билеты на sold-out события от людей, которые не смогут пойти. Деньги продавцу — только после передачи билета.</Text>
+          <Text style={st.promoTitle}>{t.home.promoTitle}</Text>
+          <Text style={st.promoText}>{t.home.promoText}</Text>
         </View>
         <Text style={{ fontSize: 46 }}>🎟️</Text>
       </View>
 
-      <SectionTitle title="Категории" action="Все" onAction={() => nav.navigate('Category', { id: 'all' })} />
-      <View style={st.catGrid}>
-        {CATEGORIES.map((c) => (
-          <Pressable key={c.id} onPress={() => nav.navigate('Category', { id: c.id })} style={st.catItem}>
-            <View style={[st.catIcon, { backgroundColor: c.color + '22' }]}>
-              <Ionicons name={c.icon as any} size={22} color={c.color} />
-            </View>
-            <Text style={st.catText} numberOfLines={1}>{c.title}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <SectionTitle title="🔥 Раскуплено в кассе" />
-      {hot.length ? (
-        <FlatList
-          horizontal
-          data={hot}
-          keyExtractor={(e) => e.id}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: space(4) }}
-          renderItem={({ item }) => <EventCardWide event={item} onPress={() => nav.navigate('Event', { id: item.id })} />}
-        />
-      ) : (
-        <Text style={st.none}>В городе {city} пока нет sold-out событий</Text>
-      )}
-
-      <SectionTitle title="Скоро" />
-      <FlatList
-        horizontal
-        data={cityEvents.filter((e) => !e.soldOut)}
-        keyExtractor={(e) => e.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: space(4) }}
-        renderItem={({ item }) => <EventCardWide event={item} onPress={() => nav.navigate('Event', { id: item.id })} />}
-        ListEmptyComponent={<Text style={[st.none, { paddingHorizontal: 0 }]}>Нет событий</Text>}
-      />
-
-      <SectionTitle title="Новые объявления" />
+      <SectionTitle title={t.home.fresh} />
       {fresh.map((l) => (
         <ListingRow key={l.id} listing={l} showEvent onPress={() => nav.navigate('Listing', { id: l.id })} />
       ))}
-      {!fresh.length && <Text style={st.none}>Пока пусто — станьте первым продавцом</Text>}
+      {!fresh.length && <Text style={st.none}>{query ? t.home.nothing : t.home.freshEmpty}</Text>}
 
       <Modal visible={cityOpen} transparent animationType="fade" onRequestClose={() => setCityOpen(false)}>
         <Pressable style={st.backdrop} onPress={() => setCityOpen(false)}>
           <View style={st.sheet}>
-            <Text style={st.sheetTitle}>Город</Text>
+            <Text style={st.sheetTitle}>{t.home.city}</Text>
             {CITIES.map((c) => (
               <Pressable key={c} style={st.sheetRow} onPress={() => { setCity(c); setCityOpen(false); }}>
-                <Text style={[st.sheetRowText, c === city && { color: colors.accent }]}>{c}</Text>
+                <Text style={[st.sheetRowText, c === city && { color: colors.accent }]}>{t.cities[c] ?? c}</Text>
                 {c === city && <Ionicons name="checkmark" size={20} color={colors.accent} />}
               </Pressable>
             ))}
@@ -135,10 +103,6 @@ const st = StyleSheet.create({
   promo: { flexDirection: 'row', alignItems: 'center', marginHorizontal: space(4), marginTop: space(4), padding: space(4), borderRadius: radius.lg, backgroundColor: '#2A2410', borderWidth: 1, borderColor: '#4A3D12' },
   promoTitle: { color: colors.accent, fontSize: 17, fontWeight: '800' },
   promoText: { color: colors.textDim, fontSize: 13, marginTop: 4, lineHeight: 18, marginRight: 8 },
-  catGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: space(2) },
-  catItem: { width: '25%', alignItems: 'center', marginBottom: space(4) },
-  catIcon: { width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  catText: { color: colors.text, fontSize: 12, fontWeight: '600', marginTop: 6 },
   none: { color: colors.textMuted, paddingHorizontal: space(4), fontSize: 14 },
   backdrop: { flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.surface, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, padding: space(5), paddingBottom: space(10) },
