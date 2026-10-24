@@ -8,7 +8,7 @@ import { useStore } from '../store';
 import { tr } from '../i18n';
 import { Badge, Button, Card, Empty } from '../components/ui';
 import { RequestSheet } from '../components/RequestSheet';
-import { Cover } from '../components/cards';
+import { Cover, FavoriteButton } from '../components/cards';
 import type { ScreenProps } from '../navigation';
 
 export const notify = (title: string, msg?: string) =>
@@ -45,6 +45,7 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
               {v.eventId && <Ionicons name="chevron-forward" size={20} color="#fff" />}
             </View>
           </Cover>
+          <FavoriteButton listingId={listing.id} style={{ position: 'absolute', top: space(3), right: space(3) }} />
         </Pressable>
 
         <Card style={{ marginTop: space(4) }}>

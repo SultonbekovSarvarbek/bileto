@@ -12,6 +12,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import EventScreen from './src/screens/EventScreen';
 import ListingScreen from './src/screens/ListingScreen';
 import DoneScreen from './src/screens/DoneScreen';
+import LegalScreen from './src/screens/LegalScreen';
 import SellScreen from './src/screens/SellScreen';
 import { FavoritesTab, LoginScreen, MyListingsScreen, ProfileTab, PurchasesScreen } from './src/screens/ProfileScreens';
 
@@ -88,6 +89,8 @@ function Root() {
         <Stack.Screen name="Purchases" component={PurchasesScreen} options={{ title: t.headers.purchases }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: '', presentation: 'modal' }} />
         <Stack.Screen name="Done" component={DoneScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        {/* modal: документ открывается и поверх модальных экранов (продажа, вход) */}
+        <Stack.Screen name="Legal" component={LegalScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

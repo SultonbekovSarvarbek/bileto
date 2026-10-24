@@ -26,6 +26,17 @@ export function Cover({ image, style, children }: { image?: ImageSourcePropType;
   );
 }
 
+// Сердечко «в избранное» поверх обложки объявления.
+export function FavoriteButton({ listingId, style }: { listingId: string; style?: ViewStyle }) {
+  const { favorites, toggleFavorite } = useStore();
+  const fav = favorites.includes(listingId);
+  return (
+    <Pressable onPress={() => toggleFavorite(listingId)} hitSlop={8} style={[st.favBtn, style]}>
+      <Ionicons name={fav ? 'heart' : 'heart-outline'} size={20} color={fav ? colors.red : '#fff'} />
+    </Pressable>
+  );
+}
+
 export function EventCover({ event, height = 140 }: { event: Event; height?: number }) {
   return <Cover image={event.image} style={{ height, borderRadius: radius.lg }} />;
 }
@@ -59,6 +70,7 @@ export function ListingRow({ listing, onPress, showEvent }: { listing: Listing; 
           {v.date && <Text numberOfLines={1} style={st.coverMeta}>{formatDate(v.date)}{v.venue ? ` · ${v.venue}` : ''}</Text>}
         </Cover>
       )}
+      {showEvent && <FavoriteButton listingId={listing.id} style={st.favOnCover} />}
       <View style={st.stub}>
         <View style={st.ticketNotchL} />
         <View style={st.ticketNotchR} />
@@ -97,6 +109,8 @@ const st = StyleSheet.create({
   titleSm: { color: colors.text, fontSize: 15, fontWeight: '700' },
   meta: { color: colors.textDim, fontSize: 12, marginTop: 4 },
   priceSm: { color: colors.accent, fontSize: 13, fontWeight: '700', marginTop: 6 },
+  favBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#00000066', alignItems: 'center', justifyContent: 'center' },
+  favOnCover: { position: 'absolute', top: space(3), right: space(3) },
   listing: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, marginHorizontal: space(4), marginBottom: space(3), overflow: 'hidden' },
   // Обложки 16:9, как сами файлы: затемнённый низ кадра всегда под текстом.
   listingCover: { aspectRatio: 16 / 9 },

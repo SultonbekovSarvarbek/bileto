@@ -68,8 +68,7 @@ const en: Dict = {
     boxPrice: (min, max) => `Box office price: ${min} – ${max}`,
     fromPeople: 'Tickets from people',
     noneSelling: 'No one is selling yet',
-    noneSellingText: "Turn on notifications — we'll let you know when a ticket appears",
-    notifyMe: 'Notify me',
+    noneSellingText: 'Check back later — new tickets from people appear every day',
     haveTicket: 'I have a ticket — sell it',
   },
 
@@ -148,7 +147,7 @@ const en: Dict = {
     transfer: 'How will you hand over the ticket',
     deliveryHint: "You'll deliver the ticket to the buyer",
     pickupHint: 'The buyer will pick up the ticket from you',
-    agree: "The ticket is genuine, belongs to me and won't be sold again. I accept the safe deal rules.",
+    agree: "The ticket is genuine, belongs to me and won't be sold again. I accept the {terms}.",
     save: 'Save changes',
     publish: 'Publish listing',
   },
@@ -167,9 +166,6 @@ const en: Dict = {
     verificationTitle: 'Verification',
     verificationText: 'Verify your identity with MyID to get the “Verified” badge and more trust from buyers.',
     language: 'Language',
-    help: 'Help & rules',
-    helpTitle: 'Help',
-    helpText: 'Safe deal rules, refunds, disputes.',
     active: 'Active',
     earned: 'Earned',
     logout: 'Log out',
@@ -191,11 +187,19 @@ const en: Dict = {
   },
 
   favorites: {
-    sub: "We'll let you know when new tickets appear or the price drops",
-    empty: 'No favorite events',
-    emptyText: 'Tap ♡ on an event to follow its tickets',
+    sub: 'Saved listings — come back before the tickets are gone',
+    empty: 'No saved listings',
+    emptyText: 'Tap ♡ on a listing photo to save it',
   },
 
+  legal: {
+    terms: 'Terms of Use',
+    privacy: 'Privacy Policy',
+    consent: 'By continuing, you accept the {terms} and the {privacy}.',
+    requestConsent: 'By sending a request, you accept the {terms} and the {privacy}.',
+    termsLink: 'Terms of Use',
+    privacyLink: 'Privacy Policy',
+  },
   register: {
     title: 'Sign up',
     sub: 'Your name, phone number and who you are on Bileto',

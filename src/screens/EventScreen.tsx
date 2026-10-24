@@ -1,5 +1,5 @@
-import React, { useLayoutEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, formatDate, formatPrice, space } from '../theme';
@@ -10,20 +10,9 @@ import type { ScreenProps } from '../navigation';
 
 export default function EventScreen({ route, navigation }: ScreenProps<'Event'>) {
   const insets = useSafeAreaInsets();
-  const { getEvent, getVenue, activeListingsFor, favorites, toggleFavorite, t } = useStore();
+  const { getEvent, getVenue, activeListingsFor, t } = useStore();
   const event = getEvent(route.params.id);
 
-  const fav = event ? favorites.includes(event.id) : false;
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () =>
-        event ? (
-          <Pressable onPress={() => toggleFavorite(event.id)} hitSlop={10}>
-            <Ionicons name={fav ? 'heart' : 'heart-outline'} size={24} color={fav ? colors.red : colors.text} />
-          </Pressable>
-        ) : null,
-    });
-  }, [navigation, fav, event, toggleFavorite]);
 
   if (!event) return <Empty icon="alert-circle" title={t.event.notFound} />;
   const venue = getVenue(event.venueId);
@@ -50,9 +39,7 @@ export default function EventScreen({ route, navigation }: ScreenProps<'Event'>)
           <ListingRow key={l.id} listing={l} onPress={() => navigation.navigate('Listing', { id: l.id })} />
         ))}
         {!offers.length && (
-          <Empty icon="ticket-outline" title={t.event.noneSelling} text={t.event.noneSellingText}>
-            <Button title={t.event.notifyMe} variant="secondary" icon="notifications-outline" onPress={() => toggleFavorite(event.id)} />
-          </Empty>
+          <Empty icon="ticket-outline" title={t.event.noneSelling} text={t.event.noneSellingText} />
         )}
       </ScrollView>
       <View style={[st.bottom, { paddingBottom: insets.bottom + space(3) }]}>

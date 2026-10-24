@@ -9,6 +9,7 @@ export type RootStackParamList = {
   Purchases: undefined;
   Login: undefined;
   Done: { id: string };
+  Legal: { doc: 'terms' | 'privacy' };
 };
 
 export type ScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, T>;

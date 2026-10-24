@@ -26,8 +26,8 @@ type Store = {
   addListing: (l: Omit<Listing, 'id' | 'createdAt' | 'views' | 'sellerId' | 'status' | 'city'>) => Listing;
   updateListing: (id: string, patch: Partial<Listing>) => void;
   removeListing: (id: string) => void;
-  favorites: string[];
-  toggleFavorite: (eventId: string) => void;
+  favorites: string[]; // id объявлений
+  toggleFavorite: (listingId: string) => void;
   requests: PurchaseRequest[];
   sendRequest: (r: Omit<PurchaseRequest, 'id' | 'date' | 'status'>) => void;
   getEvent: (id: string) => Event | undefined;
@@ -46,7 +46,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Store['user']>(null);
   const [city, setCity] = useState(CITIES[0]);
   const [listings, setListings] = useState<Listing[]>(LISTINGS);
-  const [favorites, setFavorites] = useState<string[]>(['e1']);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [requests, setRequests] = useState<PurchaseRequest[]>([]);
 
   const value = useMemo<Store>(() => ({
@@ -69,8 +69,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     updateListing: (id, patch) => setListings((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x))),
     removeListing: (id) => setListings((prev) => prev.filter((x) => x.id !== id)),
     favorites,
-    toggleFavorite: (eventId) =>
-      setFavorites((prev) => (prev.includes(eventId) ? prev.filter((x) => x !== eventId) : [...prev, eventId])),
+    toggleFavorite: (listingId) =>
+      setFavorites((prev) => (prev.includes(listingId) ? prev.filter((x) => x !== listingId) : [...prev, listingId])),
     requests,
     sendRequest: (r) =>
       setRequests((prev) => [{ ...r, id: 'r' + Date.now(), date: new Date().toISOString(), status: 'processing' }, ...prev]),

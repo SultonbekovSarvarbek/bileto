@@ -8,6 +8,7 @@ import { Delivery, SELLER_COMMISSION, SERVICE_FEE } from '../data';
 import { useStore } from '../store';
 import { Button, Chip, Field } from '../components/ui';
 import { RegisterForm } from '../components/RegisterForm';
+import { ConsentText } from '../components/ConsentText';
 import { notify } from './ListingScreen';
 import type { ScreenProps } from '../navigation';
 
@@ -150,7 +151,7 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
 
         <Pressable onPress={() => setAgree((v) => !v)} style={st.agree}>
           <Ionicons name={agree ? 'checkbox' : 'square-outline'} size={22} color={agree ? colors.accent : err('agree') ? colors.red : colors.textDim} />
-          <Text style={st.agreeText}>{t.sell.agree}</Text>
+          <ConsentText template={t.sell.agree} style={st.agreeText} />
         </Pressable>
       </ScrollView>
 

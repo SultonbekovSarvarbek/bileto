@@ -9,7 +9,7 @@ import { ListingStatus } from '../data';
 import { Role, useStore } from '../store';
 import { LANGS } from '../i18n';
 import { Badge, Button, Chip, Empty } from '../components/ui';
-import { Cover, EventRow, ListingRow } from '../components/cards';
+import { Cover, ListingRow } from '../components/cards';
 import { confirm, notify } from './ListingScreen';
 import { RegisterForm } from '../components/RegisterForm';
 import type { RootStackParamList, ScreenProps } from '../navigation';
@@ -28,6 +28,10 @@ export function ProfileTab() {
         <Empty icon="person-circle-outline" title={t.profile.cabinet} text={t.profile.loginPrompt}>
           <Button title={t.common.loginByPhone} onPress={() => nav.navigate('Login')} />
           <Button title={`${t.profile.language}: ${t.langName}`} variant="ghost" icon="language-outline" onPress={() => setLangOpen(true)} style={{ marginTop: space(3) }} />
+          <View style={{ flexDirection: 'row', gap: space(4), marginTop: space(5) }}>
+            <Text style={st.legalLink} onPress={() => nav.navigate('Legal', { doc: 'terms' })}>{t.legal.terms}</Text>
+            <Text style={st.legalLink} onPress={() => nav.navigate('Legal', { doc: 'privacy' })}>{t.legal.privacy}</Text>
+          </View>
         </Empty>
         <LanguageSheet visible={langOpen} onClose={() => setLangOpen(false)} />
       </View>
@@ -56,7 +60,8 @@ export function ProfileTab() {
       },
     },
     { icon: 'language-outline', title: `${t.profile.language}: ${t.langName}`, onPress: () => setLangOpen(true) },
-    { icon: 'help-circle-outline', title: t.profile.help, onPress: () => notify(t.profile.helpTitle, t.profile.helpText) },
+    { icon: 'document-text-outline', title: t.legal.terms, onPress: () => nav.navigate('Legal', { doc: 'terms' }) },
+    { icon: 'lock-closed-outline', title: t.legal.privacy, onPress: () => nav.navigate('Legal', { doc: 'privacy' }) },
   ];
 
   return (
@@ -209,17 +214,17 @@ export function PurchasesScreen({ navigation }: ScreenProps<'Purchases'>) {
 export function FavoritesTab() {
   const nav = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
-  const { favorites, getEvent, t } = useStore();
-  const data = favorites.map((id) => getEvent(id)).filter(Boolean) as NonNullable<ReturnType<typeof getEvent>>[];
+  const { favorites, listings, t } = useStore();
+  const data = favorites.map((id) => listings.find((l) => l.id === id)).filter((l): l is NonNullable<typeof l> => !!l);
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + space(2) }}>
       <Text style={st.h1}>{t.tabs.favorites}</Text>
       <Text style={st.sub}>{t.favorites.sub}</Text>
       <FlatList
         data={data}
-        keyExtractor={(e) => e.id}
+        keyExtractor={(l) => l.id}
         contentContainerStyle={{ paddingBottom: 120 }}
-        renderItem={({ item }) => <EventRow event={item} onPress={() => nav.navigate('Event', { id: item.id })} />}
+        renderItem={({ item }) => <ListingRow listing={item} showEvent onPress={() => nav.navigate('Listing', { id: item.id })} />}
         ListEmptyComponent={<Empty icon="heart-outline" title={t.favorites.empty} text={t.favorites.emptyText} />}
       />
     </View>
@@ -235,6 +240,7 @@ export function LoginScreen({ navigation }: ScreenProps<'Login'>) {
 }
 
 const st = StyleSheet.create({
+  legalLink: { color: colors.textDim, fontSize: 13, textDecorationLine: 'underline' },
   backdrop: { flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.surface, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, padding: space(5), paddingBottom: space(10) },
   sheetTitle: { color: colors.text, fontSize: 20, fontWeight: '800', marginBottom: space(3) },

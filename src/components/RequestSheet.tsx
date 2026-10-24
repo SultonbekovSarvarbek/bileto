@@ -6,10 +6,15 @@ import { colors, formatPhone, formatPrice, normalizePhone, radius, space } from 
 import { Listing, SERVICE_FEE } from '../data';
 import { useStore } from '../store';
 import { Button, Field } from './ui';
+import { ConsentText } from './ConsentText';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation';
 
 // Окно «Купить»: имя + телефон → заявка уходит операторам → «Заявка отправлена».
 export function RequestSheet({ listing, visible, onClose }: { listing: Listing; visible: boolean; onClose: () => void }) {
   const insets = useSafeAreaInsets();
+  const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, sendRequest, listingView, t } = useStore();
   const [qty, setQty] = useState(1);
   const [name, setName] = useState(user?.name ?? '');
@@ -78,6 +83,14 @@ export function RequestSheet({ listing, visible, onClose }: { listing: Listing; 
               </View>
 
               <Button title={t.request.submit} icon="paper-plane" onPress={submit} />
+              <ConsentText
+                template={t.legal.requestConsent}
+                style={{ textAlign: 'center', marginTop: space(3) }}
+                onOpen={(doc) => {
+                  close();
+                  nav.navigate('Legal', { doc });
+                }}
+              />
             </ScrollView>
           )}
         </View>

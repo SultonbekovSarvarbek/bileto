@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, normalizePhone, radius, space } from '../theme';
 import { Role, useStore } from '../store';
 import { Button, Field } from './ui';
+import { ConsentText } from './ConsentText';
 
 // Регистрация: имя, телефон и роль. Используется на экране входа и перед продажей билета.
 export function RegisterForm({ defaultRole, onDone }: { defaultRole: Role; onDone?: () => void }) {
@@ -43,6 +44,7 @@ export function RegisterForm({ defaultRole, onDone }: { defaultRole: Role; onDon
           onDone?.();
         }}
       />
+      <ConsentText template={t.legal.consent} style={{ textAlign: 'center', marginTop: space(4) }} />
     </View>
   );
 }

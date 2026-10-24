@@ -1,162 +1,114 @@
-# Bileto User Agreement (Terms of Use)
+# Bileto User Agreement
 
 Version dated [DD.MM.YYYY]
 
-This User Agreement (the "Agreement") governs the relationship between [Legal entity name], TIN [TIN], address: [address] ("Bileto", "we"), and any person using the Bileto mobile application and website (the "Service").
+This agreement governs the relationship between [Legal entity name], TIN [TIN], address: [address] (hereinafter "Bileto", "we"), and users of the Bileto mobile application and website (hereinafter the "Service").
 
-By registering with the Service, posting a listing or paying for an order, you confirm that you have read and accept this Agreement and the [Privacy Policy](privacy.en.md). If you do not agree, do not use the Service.
-
----
+By registering, posting a listing or submitting a request, you confirm that you have read and accept this agreement and the Privacy Policy.
 
 ## 1. What Bileto is
 
-1.1. Bileto is a platform for the resale of event tickets between private individuals. The Seller is a user who cannot attend an event and sells their ticket. The Buyer is a user who purchases that ticket.
+1.1. Bileto is a platform for the resale of event tickets between private individuals. The seller posts a listing for a ticket, and the buyer submits a purchase request.
 
-1.2. **Bileto acts as an intermediary (agent) in the transaction.** We are not an event organizer, we do not issue tickets and we are not their owner. The ticket sale and purchase agreement is concluded between the Seller and the Buyer, while Bileto:
+1.2. **Bileto acts as an intermediary.** We do not organize events, do not issue tickets and are not their owner. For each request, a Bileto operator:
 
-- accepts payment from the Buyer and **holds (freezes) the money** until the transaction is completed;
-- monitors the transfer of the ticket from the Seller to the Buyer;
-- **transfers the money to the Seller only after the ticket has been delivered and confirmed**;
-- **guarantees the Buyer a refund** if the ticket was not delivered or turned out to be invalid (Section 6);
-- handles disputes between the parties.
+- contacts the buyer and the seller;
+- checks the ticket;
+- informs the buyer of the amount and the payment method;
+- arranges the handover of the ticket to the buyer.
 
-1.3. The event organizer is responsible for holding the event, its rescheduling, cancellation, content and admission conditions.
+1.3. The event organizer is responsible for holding the event, its rescheduling, cancellation and admission rules.
 
-## 2. Registration and account
+## 2. Registration
 
-2.1. Sign-in to the Service is performed using a mobile phone number confirmed with an SMS code.
+2.1. To register, you need to provide your name, mobile phone number and role: buyer or seller. The phone number is not verified by an SMS code.
 
-2.2. The Service may be used by persons over 18 years of age. Persons aged 16 to 18 may use it only with the consent of their parents or legal representatives.
+2.2. You undertake to provide your real phone number and your own name. Registering with someone else's number is prohibited.
 
-2.3. You are responsible for all actions performed in your account and undertake not to give access to it to third parties.
+2.3. Signing in again with the same number opens the same account. Do not share the number you use to sign in with third parties.
 
-2.4. A Seller may undergo identity verification through MyID. Verified Sellers receive a "Verified" badge. Bileto may require verification for selling, withdrawing money or where fraud is suspected.
+2.4. The Service may be used by persons over 18 years of age, and by persons aged 16 to 18 with parental consent.
 
-## 3. Rules for the Seller
+2.5. Only users with the "seller" role may post listings. The role can be changed in the profile.
 
-3.1. By posting a listing, the Seller warrants that:
+## 3. Rules for the seller
 
-- the ticket is **genuine** and lawfully belongs to them;
-- the ticket **has not been and will not be sold again**, whether on Bileto or anywhere else, and its QR code or barcode will not be shared with other persons;
-- the ticket has not been cancelled, returned to the organizer or used;
-- if the ticket is a named (personalized) ticket, the organizer permits its re-registration, and the Seller will re-register it in the Buyer's name;
-- the information in the listing (event, date, section, row, seat, quantity) is accurate.
+3.1. By posting a listing, the seller guarantees that the ticket:
 
-3.2. **Ticket verification.** When posting a listing, the Seller uploads a photo or screenshot of the ticket. It is visible only to a Bileto moderator and is not shown to the Buyer. Bileto may reject or remove a listing without giving reasons.
+- is genuine and lawfully belongs to them;
+- has not been sold and will not be sold to other persons, either on Bileto or anywhere else;
+- has not been cancelled, returned to the organizer or used;
+- matches the listing: event, section, row, seats, quantity.
 
-3.3. **Price cap.** The ticket price may not exceed the face value by more than 50%. This rule protects Buyers from speculation. Stating a knowingly false face value is a breach of the Agreement.
+3.2. When posting a listing, the seller uploads a photo or screenshot of the ticket. It is seen only by Bileto operators and is not shown to buyers. Bileto may reject or remove any listing.
 
-3.4. **Ticket transfer.** After payment, the Seller must transfer the ticket through the Service **within 2 hours**. If less than 2 hours remain before the event, the transfer must be made immediately.
+3.3. The seller chooses the ticket handover method: **delivery** (the seller delivers the ticket to the buyer) or **pickup** (the buyer collects the ticket from the seller).
 
-3.5. **Payout.** The Seller receives the full price they set: the Service fee is paid by the Buyer. The money is transferred to the linked Uzcard or Humo card within [N] business days after the transaction is completed (clause 5.4). Bileto may withhold the payout until the event has ended if the Seller is not verified, is selling tickets for the first time, or if there are signs of a breach.
+3.4. After a request is received, the seller must stay in contact with the operator and hand over the ticket within the agreed time.
 
-3.6. **Seller's liability.** If the ticket is not transferred, turns out to be counterfeit, invalid, resold, or does not match the listing:
+3.5. **Bileto's commission is 10% of each ticket sold.** It is deducted from the amount the seller receives. The amount to be received is shown when the listing is created.
 
-- the Seller does not receive payment, and any amount already paid out must be returned to Bileto;
-- Bileto may deduct that amount from future payouts to the Seller;
-- the Seller's account may be blocked;
-- in case of fraud, Bileto will pass the data to law enforcement authorities.
+3.6. If a ticket turns out to be counterfeit, invalid, sold more than once or does not match the listing, Bileto may withhold the payout to the seller, block the account and, in case of fraud, pass the data to law enforcement authorities.
 
-## 4. Rules for the Buyer
+## 4. Rules for the buyer
 
-4.1. The Buyer sees the ticket price and the service fee before payment. The total amount payable = the price of the tickets + a service fee of **7%**.
+4.1. To buy a ticket, the buyer submits a request: name, phone number and number of tickets. Registration is not required for this.
 
-4.2. Payment is made via Payme, Click or by Uzcard/Humo card. Card data is processed by the payment system; Bileto does not receive or store the full card number.
+4.2. **A request is not a purchase.** The transaction is made after a Bileto operator confirms it to the buyer.
 
-4.3. After receiving the ticket, the Buyer must check it in the "My purchases" section (event, date, seat, QR code readability) and confirm receipt or open a dispute within [24 hours], but no later than the start of the event.
+4.3. **The service fee is 7%** of the ticket price. It is paid by the buyer on top of the ticket price. The total amount in soums is shown before the request is submitted.
 
-4.4. If the Buyer has neither confirmed receipt nor opened a dispute within the specified period, the ticket is deemed duly received.
+4.4. The buyer checks the ticket upon receipt and informs the operator of any discrepancy.
 
-4.5. The Buyer undertakes not to resell the purchased ticket in breach of clause 3.3 and not to use the Service to circumvent the organizer's rules.
+## 5. Payment
 
-## 5. How a safe transaction works
+5.1. Payment is made outside the application. The Bileto operator informs the buyer of the payment method and payment details.
 
-5.1. The Buyer pays for the order. The money is **frozen in Bileto's account** and is not passed to the Seller.
+5.2. Pay only using the payment details provided by the Bileto operator. The guarantees of Section 6 do not apply to money paid directly to the seller bypassing Bileto.
 
-5.2. The Seller transfers the ticket through the Service within 2 hours.
+5.3. The seller's phone number is hidden in the listing. Arranging a transaction bypassing Bileto is prohibited.
 
-5.3. The ticket appears in the Buyer's "My purchases" section, and the Buyer checks it.
+## 6. Guarantees and refunds
 
-5.4. The transaction is deemed completed when the Buyer has confirmed receipt or the period set out in clause 4.3 has expired without a dispute being opened. **Only after that does the Seller receive payment.**
+6.1. If the buyer paid for the ticket using Bileto's payment details, Bileto refunds the amount paid, including the service fee, when:
 
-5.5. It is prohibited to arrange or pay for a transaction outside the Service. Bileto's guarantees do not apply to such transactions, and the participants' accounts may be blocked.
+- the seller did not hand over the ticket within the agreed time;
+- the ticket does not match the listing;
+- the ticket turned out to be counterfeit, cancelled or already used, and the buyer was not admitted to the event.
 
-## 6. Bileto Guarantee for the Buyer
+6.2. The problem must be reported to the operator no later than 24 hours after the start of the event, with supporting evidence attached.
 
-6.1. Bileto guarantees a **full refund** of the amount paid, including the service fee, if:
+6.3. The refund is made within [N] business days after the operator's decision.
 
-- the Seller did not transfer the ticket within the period set out in clause 3.4;
-- the transferred ticket does not match the listing (different event, date, section or quantity);
-- the ticket turned out to be counterfeit, cancelled or already used, and the Buyer **was not admitted to the event** for that reason.
+6.4. The guarantee does not apply if the buyer was not admitted for reasons unrelated to the ticket (late arrival, violation of venue rules, age), or if the buyer themselves passed the ticket to third parties.
 
-6.2. In the case described in clause 6.1 (third bullet), the Buyer must report the problem through the Service **no later than 24 hours after the start of the event** and attach evidence: a photo or video of the refusal at the entrance, a certificate or message from the organizer, etc.
+6.5. If the event is cancelled and the seller has not yet received the money, Bileto refunds the full amount to the buyer. If the money has already been transferred to the seller, the refund of the ticket price is made under the organizer's rules; the seller must assist the buyer.
 
-6.3. Instead of a refund, Bileto may offer an equivalent replacement ticket if the Buyer agrees.
+## 7. Prohibited
 
-6.4. The refund is made by the same method used for payment, within [N] business days after the decision on the dispute. The time it takes for the funds to be credited depends on the bank or payment system.
+- selling counterfeit, stolen or cancelled tickets, or selling one ticket to several buyers;
+- providing someone else's name or phone number, or false information in a listing;
+- arranging a transaction and payment bypassing Bileto;
+- insulting users and operators;
+- using the Service for fraud or other unlawful activity.
 
-6.5. The guarantee does not apply if:
+## 8. Liability
 
-- the Buyer was late, violated the rules of the venue or the organizer, or was refused admission due to age, dress code or other reasons unrelated to the ticket;
-- the Buyer themselves shared the ticket or its QR code with third parties;
-- the transaction was made outside the Service (clause 5.5);
-- the Buyer confirmed receipt, and the problem would have been obvious on inspection (wrong date, section, etc.).
+8.1. Bileto's liability for a single transaction is limited to the amount the buyer paid using Bileto's payment details.
 
-## 7. Event cancellation and rescheduling
+8.2. Bileto is not liable for the actions of event organizers or for disruptions in the operation of banks, payment systems and telecom operators.
 
-7.1. If the event is cancelled **before the money has been paid out to the Seller**, Bileto refunds the full amount to the Buyer, and the transaction is cancelled.
+8.3. Bileto may restrict or block an account if the agreement is violated.
 
-7.2. If the event is cancelled **after the payout**, the ticket price is refunded by the organizer in accordance with its own rules. The Seller must assist the Buyer in obtaining the refund (for example, by providing the information required by the organizer). Bileto helps with communication but does not refund money from its own funds.
+## 9. Changes and governing law
 
-7.3. If the event is **rescheduled**, the ticket is, as a rule, valid for the new date, and the transaction is not cancelled. If the organizer offers a refund upon rescheduling, clause 7.1 or 7.2 applies, depending on whether the payout has been made.
+9.1. We may change the agreement. We will notify you of material changes in the application at least 7 days in advance.
 
-## 8. Disputes
+9.2. The agreement is governed by the laws of the Republic of Uzbekistan. Disputes are heard by the court at Bileto's location, unless otherwise provided by consumer protection legislation.
 
-8.1. A dispute is opened in the "My purchases" section. The parties must provide the evidence requested by Bileto within [24 hours].
+## 10. Contacts
 
-8.2. Bileto reviews a dispute within [3] business days from receipt of all materials. Bileto's decision on the allocation of the frozen money is binding within the Service and does not deprive the parties of the right to go to court.
-
-## 9. Prohibited
-
-- selling counterfeit, stolen or cancelled tickets, as well as tickets received free of charge or by invitation if the organizer prohibits their resale;
-- selling one ticket to several buyers;
-- providing false information, creating multiple accounts to circumvent restrictions;
-- insulting other users, publishing contact details for transactions outside the Service;
-- using the Service for money laundering or other illegal activity;
-- attempting to gain unauthorized access to the Service, using bots and automated data collection.
-
-## 10. Fees
-
-10.1. The service fee charged to the Buyer is 7% of the price of the tickets. For the Seller, posting listings and selling are free of charge.
-
-10.2. In the event of a refund under Section 6 and clause 7.1, the service fee is refunded in full.
-
-10.3. Bileto may change the amount of the fee. The new amount applies only to orders placed after the change.
-
-## 11. Bileto's liability
-
-11.1. Bileto is responsible for the safekeeping of the frozen money and its transfer in accordance with Sections 5–7.
-
-11.2. Bileto's maximum liability to a user for a single transaction is limited to the amount paid by the Buyer for that transaction.
-
-11.3. Bileto is not liable for the actions of event organizers, the quality and content of events, or for disruptions in the operation of banks, payment systems and telecom operators.
-
-## 12. Account blocking
-
-Bileto may restrict or block an account in the event of a breach of the Agreement. In that case, frozen money for uncompleted transactions is allocated in accordance with the rules of Sections 5–8.
-
-## 13. Changes to the Agreement
-
-We may amend the Agreement. We will notify you of material changes in the application at least 7 days before they take effect. By continuing to use the Service after that date, you accept the new version.
-
-## 14. Governing law
-
-The Agreement is governed by the laws of the Republic of Uzbekistan. Disputes not settled through the pre-trial claim procedure shall be heard by the court at Bileto's location, unless otherwise provided by consumer protection legislation.
-
-## 15. Contacts
-
-[Legal entity name]
-TIN: [TIN]
+[Legal entity name], TIN [TIN]
 Address: [address]
 Email: [support@bileto.uz]
 Phone: [+998 ...]
