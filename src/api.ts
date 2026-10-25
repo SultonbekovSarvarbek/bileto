@@ -65,6 +65,7 @@ export type ApiListing = {
   row: string | null;
   seats: string | null;
   description: string | null;
+  coverUrl: string | null;
   qty: number;
   qtyAvailable: number;
   price: number;

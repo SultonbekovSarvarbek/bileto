@@ -53,7 +53,7 @@ type Store = {
   getVenue: (id: string) => (typeof VENUES)[number] | undefined;
   getSeller: (id: string) => Seller | undefined;
   activeListingsFor: (eventId: string) => Listing[];
-  listingView: (l: { eventId?: string; title: string }) => ListingView;
+  listingView: (l: { eventId?: string; title: string; coverUrl?: string }) => ListingView;
 };
 
 const STATUS: Record<ApiListing['status'], ListingStatus> = { ACTIVE: 'active', SOLD: 'sold', REJECTED: 'closed', ARCHIVED: 'closed' };
@@ -69,6 +69,7 @@ const toListing = (l: ApiListing): Listing => ({
   row: l.row ?? undefined,
   seats: l.seats ?? undefined,
   description: l.description ?? undefined,
+  coverUrl: l.coverUrl ?? undefined,
   qty: l.qtyAvailable,
   price: l.price,
   delivery: l.delivery === 'DELIVERY' ? 'delivery' : 'pickup',
@@ -266,8 +267,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       listings.filter((l) => l.eventId === eventId && l.status === 'active').sort((a, b) => a.price - b.price),
     listingView: (l) => {
       const e = l.eventId ? EVENTS.find((x) => x.id === l.eventId) : undefined;
-      if (!e) return { title: l.title };
-      return { title: e.title, image: e.image, date: e.date, venue: VENUES.find((v) => v.id === e.venueId)?.name, eventId: e.id };
+      // Афиша события с бэкенда, иначе обложка каталога; без обеих Cover покажет заглушку.
+      const cover = l.coverUrl ? { uri: l.coverUrl } : undefined;
+      if (!e) return { title: l.title, image: cover };
+      return { title: e.title, image: cover ?? e.image, date: e.date, venue: VENUES.find((v) => v.id === e.venueId)?.name, eventId: e.id };
     },
   }), [lang, ready, user, city, feed, refreshFeed, listings, sellers, favorites, requests, upsert, loadAccount, signOut]);
 

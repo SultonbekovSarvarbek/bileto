@@ -90,6 +90,7 @@ export type Listing = {
   row?: string;
   seats?: string;
   description?: string; // комментарий продавца, без контактов
+  coverUrl?: string; // афиша события с бэкенда; важнее обложки каталога
   qty: number; // сколько ещё в продаже
   price: number; // цена продавца за 1 билет
   delivery: Delivery; // доставка покупателю или самовывоз у продавца
