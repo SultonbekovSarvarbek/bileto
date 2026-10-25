@@ -89,6 +89,7 @@ export type Listing = {
   sector: string;
   row?: string;
   seats?: string;
+  description?: string; // комментарий продавца, без контактов
   qty: number; // сколько ещё в продаже
   price: number; // цена продавца за 1 билет
   delivery: Delivery; // доставка покупателю или самовывоз у продавца

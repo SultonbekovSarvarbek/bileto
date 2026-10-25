@@ -49,11 +49,11 @@ export function SectionTitle({ title, action, onAction }: { title: string; actio
   );
 }
 
-export function Field({ label, hint, error, ...props }: TextInputProps & { label: string; hint?: string; error?: string }) {
+export function Field({ label, hint, error, style, ...props }: TextInputProps & { label: string; hint?: string; error?: string }) {
   return (
     <View style={{ marginBottom: space(4) }}>
       <Text style={s.label}>{label}</Text>
-      <TextInput placeholderTextColor={colors.textMuted} style={[s.input, error && { borderColor: colors.red }]} {...props} />
+      <TextInput placeholderTextColor={colors.textMuted} style={[s.input, style, error && { borderColor: colors.red }]} {...props} />
       {error ? <Text style={[s.hint, { color: colors.red }]}>{error}</Text> : hint ? <Text style={s.hint}>{hint}</Text> : null}
     </View>
   );

@@ -64,6 +64,7 @@ export type ApiListing = {
   sector: string;
   row: string | null;
   seats: string | null;
+  description: string | null;
   qty: number;
   qtyAvailable: number;
   price: number;
@@ -94,6 +95,7 @@ export type ListingInput = {
   sector: string;
   row?: string;
   seats?: string;
+  description?: string; // пустая строка при редактировании стирает описание
   qty: number;
   price: number;
   delivery: 'DELIVERY' | 'PICKUP';

@@ -22,7 +22,7 @@ export type PurchaseRequest = {
   status: RequestStatus;
 };
 export type RequestInput = { listingId: string; qty: number; name: string; phone: string };
-export type ListingFields = Pick<Listing, 'eventId' | 'title' | 'sector' | 'row' | 'seats' | 'qty' | 'price' | 'delivery'>;
+export type ListingFields = Pick<Listing, 'eventId' | 'title' | 'sector' | 'row' | 'seats' | 'description' | 'qty' | 'price' | 'delivery'>;
 
 type Store = {
   lang: Lang;
@@ -68,6 +68,7 @@ const toListing = (l: ApiListing): Listing => ({
   sector: l.sector,
   row: l.row ?? undefined,
   seats: l.seats ?? undefined,
+  description: l.description ?? undefined,
   qty: l.qtyAvailable,
   price: l.price,
   delivery: l.delivery === 'DELIVERY' ? 'delivery' : 'pickup',

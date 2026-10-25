@@ -90,6 +90,13 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
           </View>
         </Card>
 
+        {listing.description && (
+          <Card style={{ marginTop: space(3) }}>
+            <Text style={st.cellLabel}>{t.listing.description}</Text>
+            <Text style={st.description}>{listing.description}</Text>
+          </Card>
+        )}
+
         <Card style={{ marginTop: space(3) }}>
           <View style={st.rowBetween}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -176,6 +183,7 @@ const st = StyleSheet.create({
   cell: { width: '50%', marginBottom: space(3) },
   cellLabel: { color: colors.textMuted, fontSize: 12 },
   cellValue: { color: colors.text, fontSize: 16, fontWeight: '700', marginTop: 2 },
+  description: { color: colors.text, fontSize: 15, lineHeight: 22, marginTop: 6 },
   divider: { height: 1, backgroundColor: colors.border, marginVertical: space(2) },
   price: { color: colors.text, fontSize: 24, fontWeight: '900' },
   nominal: { color: colors.textMuted, fontSize: 12, marginTop: 2 },

@@ -27,6 +27,7 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
   const [sector, setSector] = useState(editing?.sector ?? '');
   const [row, setRow] = useState(editing?.row ?? '');
   const [seats, setSeats] = useState(editing?.seats ?? '');
+  const [description, setDescription] = useState(editing?.description ?? '');
   const [qty, setQty] = useState(editing?.qty ?? 1);
   const [delivery, setDelivery] = useState<Delivery>(editing?.delivery ?? 'delivery');
   const [price, setPrice] = useState(editing ? String(editing.price) : '');
@@ -76,7 +77,7 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
       notify(t.sell.checkForm, Object.values(errors).filter(Boolean)[0]);
       return;
     }
-    const payload = { eventId, title: title.trim(), sector: sector.trim(), row: row.trim() || undefined, seats: seats.trim() || undefined, qty, price: priceN, delivery };
+    const payload = { eventId, title: title.trim(), sector: sector.trim(), row: row.trim() || undefined, seats: seats.trim() || undefined, description: description.trim() || (editing ? '' : undefined), qty, price: priceN, delivery };
     // Новое фото билета отправляем, только если продавец его выбрал.
     const newProof = proof && proof !== 'existing' ? proof : undefined;
     setBusy(true);
@@ -137,6 +138,18 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
           ))}
         </View>
 
+        <Field
+          label={t.sell.description}
+          value={description}
+          onChangeText={setDescription}
+          placeholder={t.sell.descriptionPh}
+          hint={t.sell.descriptionHint}
+          multiline
+          maxLength={1000}
+          textAlignVertical="top"
+          style={st.descriptionInput}
+        />
+
         {/* 4. Цена и передача */}
         <Step n={4} title={t.sell.stepPrice} />
         <Field label={t.sell.price} keyboardType="number-pad" value={pretty(price)} onChangeText={setPrice} placeholder="500 000" error={err('price')} />
@@ -191,6 +204,7 @@ const st = StyleSheet.create({
   hint: { color: colors.textMuted, fontSize: 12, marginTop: 6, textAlign: 'center' },
   error: { color: colors.red, fontSize: 12, marginTop: 6 },
   label: { color: colors.textDim, fontSize: 13, fontWeight: '600', marginBottom: 8 },
+  descriptionInput: { height: 110, paddingTop: 12, paddingBottom: 12 },
   qtyRow: { flexDirection: 'row', gap: 8, marginBottom: space(4) },
   qtyBox: { flex: 1, height: 46, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
   qtyActive: { backgroundColor: colors.accent, borderColor: colors.accent },
