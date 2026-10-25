@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { EVENTS, Listing, Event, Seller, VENUES, CITIES, ListingStatus } from './data';
 import type { ImageSourcePropType } from 'react-native';
 import { DEFAULT_LANG, DICTS, Dict, Lang, setCurrentLang } from './i18n';
-import { api, ApiError, ApiListing, ApiRequest, ApiUser, ListingInput, setToken, tokenStorage } from './api';
+import { api, ApiError, ApiListing, ApiRequest, ApiUser, ListingInput, mediaUrl, setToken, tokenStorage } from './api';
 
 // Что показывать в шапке объявления: данные события, если оно привязано, иначе название от продавца.
 export type ListingView = { title: string; image?: ImageSourcePropType; date?: string; venue?: string; eventId?: string };
@@ -15,14 +15,14 @@ export type RequestStatus = 'processing' | 'done' | 'cancelled';
 export type PurchaseRequest = {
   id: string;
   number?: number;
-  listing: { id: string; eventId?: string; title: string; sector: string; row?: string };
+  listing: { id: string; eventId?: string; title: string };
   qty: number;
   total: number;
   date: string;
   status: RequestStatus;
 };
 export type RequestInput = { listingId: string; qty: number; name: string; phone: string };
-export type ListingFields = Pick<Listing, 'eventId' | 'title' | 'sector' | 'row' | 'seats' | 'description' | 'qty' | 'price' | 'delivery'>;
+export type ListingFields = Pick<Listing, 'eventId' | 'title' | 'description' | 'qty' | 'price' | 'delivery'>;
 
 type Store = {
   lang: Lang;
@@ -65,11 +65,8 @@ const toListing = (l: ApiListing): Listing => ({
   title: l.title,
   city: l.city,
   sellerId: l.seller.id,
-  sector: l.sector,
-  row: l.row ?? undefined,
-  seats: l.seats ?? undefined,
   description: l.description ?? undefined,
-  coverUrl: l.coverUrl ?? undefined,
+  coverUrl: l.coverUrl ? mediaUrl(l.coverUrl) : undefined,
   qty: l.qtyAvailable,
   price: l.price,
   delivery: l.delivery === 'DELIVERY' ? 'delivery' : 'pickup',
@@ -88,7 +85,7 @@ const toUser = (u: ApiUser): User => ({ id: u.id, name: u.name ?? '', phone: u.p
 const toRequest = (r: ApiRequest): PurchaseRequest => ({
   id: r.id,
   number: r.number,
-  listing: { id: r.listing.id, eventId: r.listing.eventId ?? undefined, title: r.listing.title, sector: r.listing.sector, row: r.listing.row ?? undefined },
+  listing: { id: r.listing.id, eventId: r.listing.eventId ?? undefined, title: r.listing.title },
   qty: r.qty,
   total: r.total,
   date: r.createdAt,
@@ -267,7 +264,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       listings.filter((l) => l.eventId === eventId && l.status === 'active').sort((a, b) => a.price - b.price),
     listingView: (l) => {
       const e = l.eventId ? EVENTS.find((x) => x.id === l.eventId) : undefined;
-      // Афиша события с бэкенда, иначе обложка каталога; без обеих Cover покажет заглушку.
+      // Обложка с бэкенда (фото продавца или афиша), иначе обложка каталога; без обеих Cover покажет заглушку.
       const cover = l.coverUrl ? { uri: l.coverUrl } : undefined;
       if (!e) return { title: l.title, image: cover };
       return { title: e.title, image: cover ?? e.image, date: e.date, venue: VENUES.find((v) => v.id === e.venueId)?.name, eventId: e.id };

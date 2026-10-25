@@ -86,11 +86,8 @@ export type Listing = {
   title: string; // название, которое ввёл продавец
   city: string;
   sellerId: string;
-  sector: string;
-  row?: string;
-  seats?: string;
-  description?: string; // комментарий продавца, без контактов
-  coverUrl?: string; // афиша события с бэкенда; важнее обложки каталога
+  description?: string; // описание продавца: место, ряд, формат билета; без контактов
+  coverUrl?: string; // обложка с бэкенда: фото продавца или афиша; важнее обложки каталога
   qty: number; // сколько ещё в продаже
   price: number; // цена продавца за 1 билет
   delivery: Delivery; // доставка покупателю или самовывоз у продавца

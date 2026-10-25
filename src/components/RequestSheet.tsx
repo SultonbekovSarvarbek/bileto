@@ -70,7 +70,7 @@ export function RequestSheet({ listing, visible, onClose }: { listing: Listing; 
                 <Text style={st.title}>{t.request.title}</Text>
                 <Pressable onPress={close} hitSlop={10}><Ionicons name="close" size={24} color={colors.textDim} /></Pressable>
               </View>
-              <Text style={st.listing} numberOfLines={2}>{listingView(listing).title} · {listing.sector}</Text>
+              <Text style={st.listing} numberOfLines={2}>{listingView(listing).title}</Text>
 
               {listing.qty > 1 && (
                 <View style={st.qtyRow}>

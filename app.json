@@ -11,7 +11,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "uz.bileto.app",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Нужен доступ к фото, чтобы загрузить скриншот билета для проверки."
+        "NSPhotoLibraryUsageDescription": "Нужен доступ к фото, чтобы выбрать обложку объявления — фото или скриншот билета."
       }
     },
     "android": {

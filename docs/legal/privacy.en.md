@@ -10,7 +10,7 @@ We process personal data in accordance with the Law of the Republic of Uzbekista
 
 **At registration:** name, phone number, role (buyer or seller), application language.
 
-**In seller listings:** event name, city, section, row, seats, quantity, price, handover method, **photo or screenshot of the ticket**. The photo is seen only by Bileto operators.
+**In seller listings:** event name, city, description, quantity, price, handover method, **cover** — a photo or screenshot of the ticket or another image. The cover is shown to all users in the listing.
 
 **In purchase requests:** the name, phone number and number of tickets you provided, as well as the listing the request was sent for.
 
@@ -18,7 +18,7 @@ We process personal data in accordance with the Law of the Republic of Uzbekista
 
 **Technical data:** device model, operating system and application version, IP address, error logs.
 
-The application requests access to the photo gallery only to select a photo of the ticket. We receive only the image you select.
+The application requests access to the photo gallery only to select a listing cover. We receive only the image you select.
 
 ## 2. Why we use data
 
@@ -35,7 +35,7 @@ We **do not sell** your data and do not use it for third-party advertising.
 
 **Other users.** Buyers see the seller's name and rating. **The seller's phone number is hidden in the listing** (for example, +998 90 ••• •• 67).
 
-**Bileto operators.** To carry out a transaction, operators see the name and phone number of the buyer and the seller, the listing details and the photo of the ticket.
+**Bileto operators.** To carry out a transaction, operators see the name and phone number of the buyer and the seller, the listing details and its cover.
 
 **Telegram.** Requests and new listings, together with the names and phone numbers of the parties, are automatically sent to a private Bileto operators' chat via a Telegram bot. This data is stored on Telegram servers, which may be located outside the Republic of Uzbekistan. By submitting a request or posting a listing, you consent to such transfer.
 
@@ -51,7 +51,7 @@ We **do not sell** your data and do not use it for third-party advertising.
 
 - account data — while the account exists and for [3 years] after its deletion;
 - requests and listings — [3 years] to resolve possible disputes;
-- ticket photos — [90 days] after the event date;
+- listing covers — [90 days] after the event date;
 - technical logs — up to [12 months].
 
 When the period expires, the data is deleted or anonymized.
@@ -59,7 +59,7 @@ When the period expires, the data is deleted or anonymized.
 ## 5. How we protect data
 
 - data is transferred only over a secure connection;
-- ticket photos are not accessible to other users;
+- other users only see what is published in the listing: the cover, description and price; the seller's phone number is shown masked;
 - operators access data only to carry out transactions.
 
 ## 6. Your rights

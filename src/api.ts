@@ -5,6 +5,9 @@ import * as SecureStore from 'expo-secure-store';
 // для телефона в той же Wi-Fi сети — из .env.development.local с IP компьютера.
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://api.bileto.uz/api';
 
+// Фото продавцов бэкенд отдаёт путём без хоста (/photos/…), афиши — полным адресом.
+export const mediaUrl = (path: string) => (path.startsWith('/') ? API_URL.replace(/\/api\/?$/, '') + path : path);
+
 const TOKEN_KEY = 'bileto.token';
 
 // SecureStore нет в вебе: там токен живёт в localStorage.
@@ -61,9 +64,6 @@ export type ApiListing = {
   eventId: string | null;
   title: string;
   city: string;
-  sector: string;
-  row: string | null;
-  seats: string | null;
   description: string | null;
   coverUrl: string | null;
   qty: number;
@@ -87,15 +87,12 @@ export type ApiRequest = {
   total: number;
   status: 'NEW' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
   createdAt: string;
-  listing: { id: string; eventId: string | null; title: string; sector: string; row: string | null };
+  listing: { id: string; eventId: string | null; title: string };
 };
 export type ListingInput = {
   eventId?: string;
   title: string;
   city: string;
-  sector: string;
-  row?: string;
-  seats?: string;
   description?: string; // пустая строка при редактировании стирает описание
   qty: number;
   price: number;

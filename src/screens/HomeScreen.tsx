@@ -25,7 +25,7 @@ export default function HomeScreen() {
     .filter((l) => {
       if (!query) return true;
       const v = listingView(l);
-      return [v.title, l.sector, v.venue].some((s) => s?.toLowerCase().includes(query));
+      return [v.title, l.description, v.venue].some((s) => s?.toLowerCase().includes(query));
     })
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 

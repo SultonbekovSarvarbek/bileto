@@ -71,13 +71,12 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
         </Pressable>
 
         <Card style={{ marginTop: space(4) }}>
-          <View style={st.rowBetween}>
-            <Text style={st.sector}>{listing.sector}</Text>
-            {listing.status !== 'active' && <Badge text={listing.status === 'sold' ? t.common.sold : t.myListings.closed} color={colors.textDim} />}
-          </View>
+          {listing.status !== 'active' && (
+            <View style={st.rowBetween}>
+              <Badge text={listing.status === 'sold' ? t.common.sold : t.myListings.closed} color={colors.textDim} />
+            </View>
+          )}
           <View style={st.grid}>
-            <Cell label={t.listing.row} value={listing.row ?? '—'} />
-            <Cell label={t.listing.seats} value={listing.seats ?? '—'} />
             <Cell label={t.listing.available} value={t.common.pcs(listing.qty)} />
             <Cell label={t.listing.transfer} value={t.common[listing.delivery]} />
           </View>
@@ -178,7 +177,6 @@ const st = StyleSheet.create({
   eventTitle: { color: '#fff', fontSize: 18, fontWeight: '800', textShadowColor: '#000000AA', textShadowRadius: 6 },
   eventMeta: { color: '#ffffffdd', fontSize: 13, marginTop: 2, textShadowColor: '#000000AA', textShadowRadius: 6 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  sector: { color: colors.text, fontSize: 22, fontWeight: '900' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: space(3) },
   cell: { width: '50%', marginBottom: space(3) },
   cellLabel: { color: colors.textMuted, fontSize: 12 },

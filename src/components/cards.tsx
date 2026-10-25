@@ -75,11 +75,8 @@ export function ListingRow({ listing, onPress, showEvent }: { listing: Listing; 
         <View style={st.ticketNotchL} />
         <View style={st.ticketNotchR} />
         <View style={{ flex: 1 }}>
-          <Text style={st.sector}>{listing.sector}</Text>
-          <Text style={st.seat}>
-            {[listing.row && t.common.row(listing.row), listing.seats && t.common.seats(listing.seats)].filter(Boolean).join(' · ') || t.cards.noSeat}
-            {' · '}{t.common.pcs(listing.qty)}
-          </Text>
+          <Text style={st.qty}>{t.common.pcs(listing.qty)}</Text>
+          {!!listing.description && <Text style={st.seat} numberOfLines={2}>{listing.description}</Text>}
           <View style={[st.row, { marginTop: 8 }]}>
             <Ionicons name={seller?.verified ? 'shield-checkmark' : 'person-circle-outline'} size={14} color={seller?.verified ? colors.green : colors.textDim} />
             <Text style={st.seller}>{seller?.name}</Text>
@@ -117,7 +114,7 @@ const st = StyleSheet.create({
   stub: { flexDirection: 'row', alignItems: 'center', padding: space(4) },
   ticketNotchL: { position: 'absolute', left: -9, top: '50%', marginTop: 0, width: 18, height: 18, borderRadius: 9, backgroundColor: colors.bg, borderWidth: 1, borderColor: colors.border },
   ticketNotchR: { position: 'absolute', right: -9, top: '50%', width: 18, height: 18, borderRadius: 9, backgroundColor: colors.bg, borderWidth: 1, borderColor: colors.border },
-  sector: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  qty: { color: colors.text, fontSize: 16, fontWeight: '800' },
   seat: { color: colors.textDim, fontSize: 13, marginTop: 3 },
   seller: { color: colors.textDim, fontSize: 12, marginLeft: 4, flex: 1 },
   dash: { width: 1, alignSelf: 'stretch', borderLeftWidth: 1, borderStyle: 'dashed', borderColor: colors.border, marginHorizontal: space(3) },

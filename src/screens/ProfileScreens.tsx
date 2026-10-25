@@ -222,7 +222,7 @@ export function PurchasesScreen({ navigation }: ScreenProps<'Purchases'>) {
             </Cover>
             <View style={st.ticketBody}>
               {e.venue && <Text style={st.ticketInfo}>{e.venue}</Text>}
-              <Text style={st.ticketInfo}>{l.sector}{l.row ? `, ${t.common.rowLower(l.row)}` : ''} · {t.common.pcs(item.qty)}</Text>
+              <Text style={st.ticketInfo}>{t.common.pcs(item.qty)}</Text>
               <View style={st.ticketFoot}>
                 <Badge text={STATUS[item.status].text} color={STATUS[item.status].color} />
                 <Text style={st.ticketPrice}>{formatPrice(item.total)}</Text>

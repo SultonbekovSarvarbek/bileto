@@ -24,14 +24,13 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
   // Со страницы события объявление привязывается к нему, а название подставляется.
   const eventId = editing ? editing.eventId : route.params?.eventId;
   const [title, setTitle] = useState(editing ? listingView(editing).title : (eventId && getEvent(eventId)?.title) || '');
-  const [sector, setSector] = useState(editing?.sector ?? '');
-  const [row, setRow] = useState(editing?.row ?? '');
-  const [seats, setSeats] = useState(editing?.seats ?? '');
   const [description, setDescription] = useState(editing?.description ?? '');
   const [qty, setQty] = useState(editing?.qty ?? 1);
   const [delivery, setDelivery] = useState<Delivery>(editing?.delivery ?? 'delivery');
   const [price, setPrice] = useState(editing ? String(editing.price) : '');
-  const [proof, setProof] = useState<string | null>(editing ? 'existing' : null);
+  // Обложка: фото билета или любое фото на выбор продавца. При редактировании показываем текущую.
+  const initialProof = editing ? (editing.coverUrl ?? 'existing') : null;
+  const [proof, setProof] = useState<string | null>(initialProof);
   const [agree, setAgree] = useState(!!editing);
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -60,7 +59,6 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
   const errors = {
     title: !title.trim() ? t.sell.errTitle : '',
     proof: !proof ? t.sell.errProof : '',
-    sector: !sector.trim() ? t.sell.errSector : '',
     price: !priceN ? t.sell.errPrice : '',
     agree: !agree ? t.sell.errAgree : '',
   };
@@ -77,9 +75,9 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
       notify(t.sell.checkForm, Object.values(errors).filter(Boolean)[0]);
       return;
     }
-    const payload = { eventId, title: title.trim(), sector: sector.trim(), row: row.trim() || undefined, seats: seats.trim() || undefined, description: description.trim() || (editing ? '' : undefined), qty, price: priceN, delivery };
-    // Новое фото билета отправляем, только если продавец его выбрал.
-    const newProof = proof && proof !== 'existing' ? proof : undefined;
+    const payload = { eventId, title: title.trim(), description: description.trim() || (editing ? '' : undefined), qty, price: priceN, delivery };
+    // Новое фото отправляем, только если продавец его выбрал.
+    const newProof = proof && proof !== initialProof ? proof : undefined;
     setBusy(true);
     try {
       if (editing) {
@@ -122,13 +120,8 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
         </Pressable>
         {!!err('proof') && <Text style={[st.error, { marginTop: -space(2), marginBottom: space(2) }]}>{err('proof')}</Text>}
 
-        {/* 3. Место */}
-        <Step n={3} title={t.sell.stepSeat} />
-        <Field label={t.sell.sector} value={sector} onChangeText={setSector} placeholder={t.sell.sectorPh} error={err('sector')} />
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <View style={{ flex: 1 }}><Field label={t.listing.row} value={row} onChangeText={setRow} placeholder="—" /></View>
-          <View style={{ flex: 1 }}><Field label={t.listing.seats} value={seats} onChangeText={setSeats} placeholder="12–13" /></View>
-        </View>
+        {/* 3. Билеты */}
+        <Step n={3} title={t.sell.stepTickets} />
         <Text style={st.label}>{t.sell.qty}</Text>
         <View style={st.qtyRow}>
           {[1, 2, 3, 4, 5, 6].map((n) => (
