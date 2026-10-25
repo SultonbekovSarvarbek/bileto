@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, formatPhone, formatPrice, normalizePhone, radius, space } from '../theme';
 import { Listing, SERVICE_FEE } from '../data';
-import { useStore } from '../store';
+import { errorText, useStore } from '../store';
 import { Button, Field } from './ui';
 import { ConsentText } from './ConsentText';
 import { useNavigation } from '@react-navigation/native';
@@ -21,6 +21,8 @@ export function RequestSheet({ listing, visible, onClose }: { listing: Listing; 
   const [phone, setPhone] = useState(user ? formatPhone(user.phone) : '+998 ');
   const [tried, setTried] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   const subtotal = listing.price * qty;
   const fee = Math.round(subtotal * SERVICE_FEE);
@@ -28,17 +30,26 @@ export function RequestSheet({ listing, visible, onClose }: { listing: Listing; 
   const errName = name.trim().length < 2 ? t.request.errName : '';
   const errPhone = !normalized ? t.request.errPhone : '';
 
-  const submit = () => {
+  const submit = async () => {
     setTried(true);
     if (errName || !normalized) return;
-    sendRequest({ listingId: listing.id, qty, subtotal, fee, total: subtotal + fee, name: name.trim(), phone: normalized });
-    setSentTo(normalized);
+    setBusy(true);
+    setError('');
+    try {
+      await sendRequest({ listingId: listing.id, qty, name: name.trim(), phone: normalized });
+      setSentTo(normalized);
+    } catch (e) {
+      setError(errorText(e, t));
+    } finally {
+      setBusy(false);
+    }
   };
 
   const close = () => {
     onClose();
     setSentTo(null);
     setTried(false);
+    setError('');
   };
 
   return (
@@ -82,7 +93,8 @@ export function RequestSheet({ listing, visible, onClose }: { listing: Listing; 
                 <Text style={st.note}>{t.request.payNote}</Text>
               </View>
 
-              <Button title={t.request.submit} icon="paper-plane" onPress={submit} />
+              {!!error && <Text style={st.error}>{error}</Text>}
+              <Button title={t.request.submit} icon="paper-plane" loading={busy} onPress={submit} />
               <ConsentText
                 template={t.legal.requestConsent}
                 style={{ textAlign: 'center', marginTop: space(3) }}
@@ -123,6 +135,7 @@ const st = StyleSheet.create({
   lineLabel: { color: colors.textDim, fontSize: 14 },
   lineValue: { color: colors.text, fontSize: 15, fontWeight: '700' },
   divider: { height: 1, backgroundColor: colors.border, marginVertical: space(2) },
+  error: { color: colors.red, fontSize: 13, marginBottom: space(3), textAlign: 'center' },
   note: { color: colors.textMuted, fontSize: 12, marginTop: space(2), lineHeight: 17 },
   doneIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', marginTop: space(2) },
   doneTitle: { color: colors.text, fontSize: 22, fontWeight: '900', marginTop: space(4), textAlign: 'center' },

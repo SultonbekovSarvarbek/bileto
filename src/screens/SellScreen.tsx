@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { colors, formatPrice, radius, space } from '../theme';
 import { Delivery, SELLER_COMMISSION, SERVICE_FEE } from '../data';
-import { useStore } from '../store';
+import { errorText, useStore } from '../store';
 import { Button, Chip, Field } from '../components/ui';
 import { RegisterForm } from '../components/RegisterForm';
 import { ConsentText } from '../components/ConsentText';
@@ -33,6 +33,7 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
   const [proof, setProof] = useState<string | null>(editing ? 'existing' : null);
   const [agree, setAgree] = useState(!!editing);
   const [tried, setTried] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   // Продать билет можно только после регистрации и только в роли продавца.
   if (!user) {
@@ -47,7 +48,7 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
       <View style={{ flex: 1, backgroundColor: colors.bg, padding: space(6), justifyContent: 'center' }}>
         <Text style={st.h1}>{t.sell.sellerOnly}</Text>
         <Text style={st.gateText}>{t.sell.sellerOnlyText}</Text>
-        <Button title={t.sell.becomeSeller} icon="pricetags-outline" onPress={() => setRole('seller')} style={{ marginTop: space(6) }} />
+        <Button title={t.sell.becomeSeller} icon="pricetags-outline" loading={busy} onPress={() => { setBusy(true); setRole('seller').catch((e) => notify(errorText(e, t))).finally(() => setBusy(false)); }} style={{ marginTop: space(6) }} />
       </View>
     );
   }
@@ -69,19 +70,28 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
     if (!res.canceled) setProof(res.assets[0].uri);
   };
 
-  const submit = () => {
+  const submit = async () => {
     setTried(true);
     if (!valid) {
       notify(t.sell.checkForm, Object.values(errors).filter(Boolean)[0]);
       return;
     }
     const payload = { eventId, title: title.trim(), sector: sector.trim(), row: row.trim() || undefined, seats: seats.trim() || undefined, qty, price: priceN, delivery };
-    if (editing) {
-      updateListing(editing.id, payload);
-      navigation.goBack();
-    } else {
-      const created = addListing(payload);
-      navigation.replace('Done', { id: created.id });
+    // Новое фото билета отправляем, только если продавец его выбрал.
+    const newProof = proof && proof !== 'existing' ? proof : undefined;
+    setBusy(true);
+    try {
+      if (editing) {
+        await updateListing(editing.id, payload, newProof);
+        navigation.goBack();
+      } else {
+        const created = await addListing(payload, newProof!);
+        navigation.replace('Done', { id: created.id });
+      }
+    } catch (e) {
+      notify(t.sell.checkForm, errorText(e, t));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -156,7 +166,7 @@ export default function SellScreen({ route, navigation }: ScreenProps<'Sell'>) {
       </ScrollView>
 
       <View style={[st.bottom, { paddingBottom: insets.bottom + space(3) }]}>
-        <Button title={editing ? t.sell.save : t.sell.publish} icon={editing ? 'save-outline' : 'megaphone-outline'} onPress={submit} />
+        <Button title={editing ? t.sell.save : t.sell.publish} icon={editing ? 'save-outline' : 'megaphone-outline'} loading={busy} onPress={submit} />
       </View>
     </View>
   );

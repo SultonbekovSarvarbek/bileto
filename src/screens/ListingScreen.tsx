@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, formatDate, formatPrice, maskPhone, radius, space } from '../theme';
+import { colors, formatDate, formatPrice, radius, space } from '../theme';
 import { SERVICE_FEE } from '../data';
-import { useStore } from '../store';
+import { errorText, useStore } from '../store';
 import { tr } from '../i18n';
 import { Badge, Button, Card, Empty } from '../components/ui';
 import { RequestSheet } from '../components/RequestSheet';
@@ -21,14 +21,36 @@ export const confirm = (title: string, msg: string, onYes: () => void) => {
 
 export default function ListingScreen({ route, navigation }: ScreenProps<'Listing'>) {
   const insets = useSafeAreaInsets();
-  const { listings, listingView, getSeller, updateListing, removeListing, t } = useStore();
-  const listing = listings.find((l) => l.id === route.params.id);
+  const { listings, listingView, getSeller, isMine, loadListing, markSold, removeListing, t } = useStore();
+  const id = route.params.id;
+  const listing = listings.find((l) => l.id === id);
   const [buying, setBuying] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [missing, setMissing] = useState(false);
 
-  if (!listing) return <Empty icon="alert-circle" title={t.listing.deleted} />;
+  // Свежие данные (количество, статус) и +1 просмотр на бэкенде.
+  useEffect(() => {
+    loadListing(id).catch(() => setMissing(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  if (!listing) {
+    return missing ? <Empty icon="alert-circle" title={t.listing.deleted} /> : <ActivityIndicator color={colors.accent} style={{ flex: 1, backgroundColor: colors.bg }} />;
+  }
   const v = listingView(listing);
   const seller = getSeller(listing.sellerId);
-  const mine = listing.sellerId === 'me';
+  const mine = isMine(listing);
+  const act = async (fn: () => Promise<void>, after?: () => void) => {
+    setBusy(true);
+    try {
+      await fn();
+      after?.();
+    } catch (e) {
+      notify(errorText(e, t));
+    } finally {
+      setBusy(false);
+    }
+  };
   const fee = Math.round(listing.price * SERVICE_FEE);
 
   return (
@@ -51,7 +73,7 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
         <Card style={{ marginTop: space(4) }}>
           <View style={st.rowBetween}>
             <Text style={st.sector}>{listing.sector}</Text>
-            {listing.status !== 'active' && <Badge text={listing.status === 'sold' ? t.common.sold : t.listing.reserved} color={colors.textDim} />}
+            {listing.status !== 'active' && <Badge text={listing.status === 'sold' ? t.common.sold : t.myListings.closed} color={colors.textDim} />}
           </View>
           <View style={st.grid}>
             <Cell label={t.listing.row} value={listing.row ?? '—'} />
@@ -66,7 +88,6 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
               <Text style={st.nominal}>{t.listing.perTicket}</Text>
             </View>
           </View>
-          {listing.comment ? <Text style={st.comment}>«{listing.comment}»</Text> : null}
         </Card>
 
         <Card style={{ marginTop: space(3) }}>
@@ -75,7 +96,7 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
               <View style={st.avatar}><Text style={st.avatarText}>{seller?.name[0]}</Text></View>
               <View style={{ marginLeft: space(3) }}>
                 <Text style={st.sellerName}>{mine ? t.listing.you : seller?.name}</Text>
-                {seller && <Text style={st.sellerMeta}>{t.listing.sellerMeta(seller.rating.toFixed(1), seller.deals, seller.since)}</Text>}
+                {seller && <Text style={st.sellerMeta}>{t.listing.sellerMeta(seller.since)}</Text>}
               </View>
             </View>
             {seller?.verified && <Badge text={t.listing.verified} color={colors.green} />}
@@ -84,7 +105,7 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
             <View style={st.phoneRow}>
               <Ionicons name="call-outline" size={16} color={colors.textDim} />
               <View style={{ marginLeft: 10, flex: 1 }}>
-                <Text style={st.phoneMasked}>{maskPhone(seller.phone)}</Text>
+                <Text style={st.phoneMasked}>{seller.phoneMasked}</Text>
                 <Text style={st.phoneHint}>{t.listing.phoneHidden}</Text>
               </View>
               <Ionicons name="lock-closed" size={14} color={colors.textMuted} />
@@ -108,16 +129,16 @@ export default function ListingScreen({ route, navigation }: ScreenProps<'Listin
             {listing.status === 'active' && (
               <>
                 <Button style={{ flex: 1 }} title={t.common.edit} variant="secondary" icon="create-outline" onPress={() => navigation.navigate('Sell', { editId: listing.id })} />
-                <Button style={{ flex: 1 }} title={t.common.sold} variant="secondary" icon="checkmark-done" onPress={() => updateListing(listing.id, { status: 'sold' })} />
+                <Button style={{ flex: 1 }} title={t.common.sold} variant="secondary" icon="checkmark-done" loading={busy} onPress={() => act(() => markSold(listing.id))} />
               </>
             )}
-            <Button
+            {listing.status !== 'closed' && <Button
               style={{ flex: listing.status === 'active' ? 0 : 1, paddingHorizontal: 16 }}
               title={listing.status === 'active' ? '' : t.listing.delete}
               variant="danger"
               icon="trash-outline"
-              onPress={() => confirm(t.listing.deleteQ, t.listing.deleteText, () => { removeListing(listing.id); navigation.goBack(); })}
-            />
+              onPress={() => confirm(t.listing.deleteQ, t.listing.deleteText, () => act(() => removeListing(listing.id), () => navigation.goBack()))}
+            />}
           </View>
         ) : listing.status === 'active' ? (
           <>
@@ -158,7 +179,6 @@ const st = StyleSheet.create({
   divider: { height: 1, backgroundColor: colors.border, marginVertical: space(2) },
   price: { color: colors.text, fontSize: 24, fontWeight: '900' },
   nominal: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
-  comment: { color: colors.textDim, fontSize: 14, fontStyle: 'italic', marginTop: space(3), lineHeight: 20 },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: colors.accent, fontSize: 18, fontWeight: '800' },
   sellerName: { color: colors.text, fontSize: 16, fontWeight: '700' },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,22 +7,21 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, radius, space } from '../theme';
 import { CITIES } from '../data';
 import { useStore } from '../store';
-import { SectionTitle } from '../components/ui';
+import { Button, SectionTitle } from '../components/ui';
 import { ListingRow } from '../components/cards';
 import type { RootStackParamList } from '../navigation';
 
 export default function HomeScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
-  const { events, listings, city, setCity, getVenue, listingView, t } = useStore();
+  const { listings, city, setCity, isMine, feed, refreshFeed, listingView, t } = useStore();
   const cityName = t.cities[city] ?? city;
   const [cityOpen, setCityOpen] = useState(false);
   const [q, setQ] = useState('');
 
-  const cityEvents = events.filter((e) => getVenue(e.venueId)?.city === city);
   const query = q.trim().toLowerCase();
   const fresh = listings
-    .filter((l) => l.status === 'active' && l.sellerId !== 'me' && (l.eventId ? cityEvents.some((e) => e.id === l.eventId) : l.city === city))
+    .filter((l) => l.status === 'active' && !isMine(l) && l.city === city)
     .filter((l) => {
       if (!query) return true;
       const v = listingView(l);
@@ -31,7 +30,9 @@ export default function HomeScreen() {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ paddingTop: insets.top + space(2), paddingBottom: 120 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ paddingTop: insets.top + space(2), paddingBottom: 120 }}
+      refreshControl={<RefreshControl refreshing={feed.loading && listings.length > 0} onRefresh={refreshFeed} tintColor={colors.accent} />}
+    >
       <View style={st.header}>
         <View>
           <View style={st.brand}>
@@ -75,7 +76,17 @@ export default function HomeScreen() {
       {fresh.map((l) => (
         <ListingRow key={l.id} listing={l} showEvent onPress={() => nav.navigate('Listing', { id: l.id })} />
       ))}
-      {!fresh.length && <Text style={st.none}>{query ? t.home.nothing : t.home.freshEmpty}</Text>}
+      {!fresh.length &&
+        (feed.loading ? (
+          <ActivityIndicator color={colors.accent} style={{ marginTop: space(6) }} />
+        ) : feed.error ? (
+          <View style={{ paddingHorizontal: space(4), alignItems: 'flex-start' }}>
+            <Text style={[st.none, { paddingHorizontal: 0 }]}>{t.home.feedError}. {t.common.networkError}</Text>
+            <Button title={t.common.retry} variant="secondary" icon="refresh" onPress={refreshFeed} style={{ marginTop: space(3) }} />
+          </View>
+        ) : (
+          <Text style={st.none}>{query ? t.home.nothing : t.home.freshEmpty}</Text>
+        ))}
 
       <Modal visible={cityOpen} transparent animationType="fade" onRequestClose={() => setCityOpen(false)}>
         <Pressable style={st.backdrop} onPress={() => setCityOpen(false)}>

@@ -1,23 +1,27 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, space } from '../theme';
 
 export function Button({
-  title, onPress, variant = 'primary', icon, disabled, style,
+  title, onPress, variant = 'primary', icon, disabled, loading, style,
 }: {
   title: string; onPress?: () => void; variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
-  icon?: keyof typeof Ionicons.glyphMap; disabled?: boolean; style?: ViewStyle;
+  icon?: keyof typeof Ionicons.glyphMap; disabled?: boolean; loading?: boolean; style?: ViewStyle;
 }) {
   const bg = { primary: colors.accent, secondary: colors.surface2, ghost: 'transparent', danger: '#3A1C1F' }[variant];
   const fg = { primary: colors.accentText, secondary: colors.text, ghost: colors.text, danger: colors.red }[variant];
   return (
     <Pressable
       onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [s.btn, { backgroundColor: bg, opacity: disabled ? 0.4 : pressed ? 0.8 : 1 }, variant === 'ghost' && { borderWidth: 1, borderColor: colors.border }, style]}
+      disabled={disabled || loading}
+      style={({ pressed }) => [s.btn, { backgroundColor: bg, opacity: disabled ? 0.4 : pressed || loading ? 0.8 : 1 }, variant === 'ghost' && { borderWidth: 1, borderColor: colors.border }, style]}
     >
-      {icon && <Ionicons name={icon} size={title ? 18 : 22} color={fg} style={title ? { marginRight: 8 } : undefined} />}
+      {loading ? (
+        <ActivityIndicator color={fg} style={title ? { marginRight: 8 } : undefined} />
+      ) : (
+        icon && <Ionicons name={icon} size={title ? 18 : 22} color={fg} style={title ? { marginRight: 8 } : undefined} />
+      )}
       {!!title && <Text style={[s.btnText, { color: fg }]}>{title}</Text>}
     </Pressable>
   );

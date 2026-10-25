@@ -82,7 +82,7 @@ export function ListingRow({ listing, onPress, showEvent }: { listing: Listing; 
           </Text>
           <View style={[st.row, { marginTop: 8 }]}>
             <Ionicons name={seller?.verified ? 'shield-checkmark' : 'person-circle-outline'} size={14} color={seller?.verified ? colors.green : colors.textDim} />
-            <Text style={st.seller}>{seller?.name}{seller?.deals ? ` · ★ ${seller.rating.toFixed(1)}` : ''}</Text>
+            <Text style={st.seller}>{seller?.name}</Text>
           </View>
         </View>
         <View style={st.dash} />

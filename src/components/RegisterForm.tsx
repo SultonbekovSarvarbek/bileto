@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, normalizePhone, radius, space } from '../theme';
-import { Role, useStore } from '../store';
+import { errorText, Role, useStore } from '../store';
 import { Button, Field } from './ui';
 import { ConsentText } from './ConsentText';
 
@@ -12,6 +12,8 @@ export function RegisterForm({ defaultRole, onDone }: { defaultRole: Role; onDon
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('+998 ');
   const [role, setRole] = useState<Role>(defaultRole);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
   const normalized = normalizePhone(phone);
 
   const roles: { id: Role; title: string; hint: string; icon: keyof typeof Ionicons.glyphMap }[] = [
@@ -38,12 +40,22 @@ export function RegisterForm({ defaultRole, onDone }: { defaultRole: Role; onDon
       <Button
         title={t.register.submit}
         disabled={name.trim().length < 2 || !normalized}
-        onPress={() => {
+        loading={busy}
+        onPress={async () => {
           if (!normalized) return;
-          login(name.trim(), normalized, role);
-          onDone?.();
+          setBusy(true);
+          setError('');
+          try {
+            await login(name.trim(), normalized, role);
+            onDone?.();
+          } catch (e) {
+            setError(errorText(e, t));
+          } finally {
+            setBusy(false);
+          }
         }}
       />
+      {!!error && <Text style={st.error}>{error}</Text>}
       <ConsentText template={t.legal.consent} style={{ textAlign: 'center', marginTop: space(4) }} />
     </View>
   );
@@ -51,6 +63,7 @@ export function RegisterForm({ defaultRole, onDone }: { defaultRole: Role; onDon
 
 const st = StyleSheet.create({
   title: { color: colors.text, fontSize: 28, fontWeight: '900', textAlign: 'center' },
+  error: { color: colors.red, fontSize: 13, textAlign: 'center', marginTop: space(3) },
   sub: { color: colors.textDim, fontSize: 14, textAlign: 'center', marginTop: 4, marginBottom: space(6) },
   label: { color: colors.textDim, fontSize: 13, fontWeight: '600', marginBottom: 8 },
   roles: { flexDirection: 'row', gap: 12, marginBottom: space(6) },

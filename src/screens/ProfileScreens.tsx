@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, formatDate, formatPhone, formatPrice, radius, space } from '../theme';
 import { ListingStatus } from '../data';
-import { Role, useStore } from '../store';
+import { errorText, RequestStatus, Role, useStore } from '../store';
 import { LANGS } from '../i18n';
 import { Badge, Button, Chip, Empty } from '../components/ui';
 import { Cover, ListingRow } from '../components/cards';
@@ -19,31 +19,57 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export function ProfileTab() {
   const nav = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
-  const { user, logout, setRole, listings, requests, getSeller, t } = useStore();
+  const { user, logout, setRole, listings, requests, isMine, t } = useStore();
   const [langOpen, setLangOpen] = useState(false);
 
   if (!user) {
+    const PERK_ICONS: (keyof typeof Ionicons.glyphMap)[] = ['ticket-outline', 'flash-outline', 'shield-checkmark-outline'];
+    const guestMenu: { icon: keyof typeof Ionicons.glyphMap; title: string; value?: string; onPress: () => void }[] = [
+      { icon: 'language-outline', title: t.profile.language, value: t.langName, onPress: () => setLangOpen(true) },
+      { icon: 'document-text-outline', title: t.legal.terms, onPress: () => nav.navigate('Legal', { doc: 'terms' }) },
+      { icon: 'lock-closed-outline', title: t.legal.privacy, onPress: () => nav.navigate('Legal', { doc: 'privacy' }) },
+    ];
     return (
-      <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
-        <Empty icon="person-circle-outline" title={t.profile.cabinet} text={t.profile.loginPrompt}>
-          <Button title={t.common.loginByPhone} onPress={() => nav.navigate('Login')} />
-          <Button title={`${t.profile.language}: ${t.langName}`} variant="ghost" icon="language-outline" onPress={() => setLangOpen(true)} style={{ marginTop: space(3) }} />
-          <View style={{ flexDirection: 'row', gap: space(4), marginTop: space(5) }}>
-            <Text style={st.legalLink} onPress={() => nav.navigate('Legal', { doc: 'terms' })}>{t.legal.terms}</Text>
-            <Text style={st.legalLink} onPress={() => nav.navigate('Legal', { doc: 'privacy' })}>{t.legal.privacy}</Text>
-          </View>
-        </Empty>
+      <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ paddingTop: insets.top + space(6), paddingBottom: 120 }}>
+        <View style={st.guestHero}>
+          <View style={st.guestMark}><Image source={require('../../assets/logo-mark.png')} style={st.guestMarkImg} /></View>
+          <Text style={st.guestTitle}>{t.profile.cabinet}</Text>
+          <Text style={st.guestText}>{t.profile.loginPrompt}</Text>
+        </View>
+
+        <View style={st.perks}>
+          {t.profile.perks.map((p, i) => (
+            <View key={p} style={[st.perk, i === t.profile.perks.length - 1 && { marginBottom: 0 }]}>
+              <View style={st.perkIcon}><Ionicons name={PERK_ICONS[i]} size={20} color={colors.accent} /></View>
+              <Text style={st.perkText}>{p}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={{ paddingHorizontal: space(4), marginBottom: space(6) }}>
+          <Button title={t.profile.loginCta} icon="log-in-outline" onPress={() => nav.navigate('Login')} />
+          <Text style={st.guestHint}>{t.profile.loginHint}</Text>
+        </View>
+
+        <View style={st.menu}>
+          {guestMenu.map((m, i) => (
+            <Pressable key={m.title} onPress={m.onPress} style={[st.menuRow, i === guestMenu.length - 1 && { borderBottomWidth: 0 }]}>
+              <Ionicons name={m.icon} size={22} color={colors.text} />
+              <Text style={st.menuText}>{m.title}</Text>
+              {m.value && <Text style={st.menuValue}>{m.value}</Text>}
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </Pressable>
+          ))}
+        </View>
         <LanguageSheet visible={langOpen} onClose={() => setLangOpen(false)} />
-      </View>
+      </ScrollView>
     );
   }
 
   const roleName = (r: Role) => (r === 'seller' ? t.register.seller : t.register.buyer);
-  const me = getSeller('me')!;
-  const mine = listings.filter((l) => l.sellerId === 'me');
+  const mine = listings.filter(isMine);
   const active = mine.filter((l) => l.status === 'active').length;
   const sold = mine.filter((l) => l.status === 'sold');
-  const earned = sold.reduce((s, l) => s + l.price * Math.max(l.qty, 1), 0);
 
   const menu: { icon: keyof typeof Ionicons.glyphMap; title: string; badge?: string; onPress: () => void }[] = [
     { icon: 'pricetags-outline', title: t.headers.myListings, badge: String(active), onPress: () => nav.navigate('MyListings') },
@@ -56,7 +82,7 @@ export function ProfileTab() {
       title: `${t.profile.role}: ${roleName(user.role)}`,
       onPress: () => {
         const next = user.role === 'seller' ? 'buyer' : 'seller';
-        confirm(t.profile.switchRoleQ, t.profile.switchRoleText(roleName(next)), () => setRole(next));
+        confirm(t.profile.switchRoleQ, t.profile.switchRoleText(roleName(next)), () => setRole(next).catch((e) => notify(errorText(e, t))));
       },
     },
     { icon: 'language-outline', title: `${t.profile.language}: ${t.langName}`, onPress: () => setLangOpen(true) },
@@ -71,17 +97,16 @@ export function ProfileTab() {
         <View style={{ flex: 1, marginLeft: space(4) }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Text style={st.name}>{user.name}</Text>
-            {me.verified && <Ionicons name="shield-checkmark" size={18} color={colors.green} />}
+            {user.verified && <Ionicons name="shield-checkmark" size={18} color={colors.green} />}
           </View>
           <Text style={st.phone}>{formatPhone(user.phone)}</Text>
-          {me.deals > 0 && <Text style={st.phone}>★ {me.rating.toFixed(1)} · {t.common.deals(me.deals)}</Text>}
         </View>
       </View>
 
       <View style={st.stats}>
         <Stat label={t.profile.active} value={String(active)} />
         <Stat label={t.common.sold} value={String(sold.length)} />
-        <Stat label={t.profile.earned} value={earned ? `${Math.round(earned / 1000)}K` : '0'} />
+        <Stat label={t.headers.purchases} value={String(requests.length)} />
       </View>
 
       <View style={{ paddingHorizontal: space(4), marginBottom: space(4) }}>
@@ -137,14 +162,14 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 
 export function MyListingsScreen({ navigation }: ScreenProps<'MyListings'>) {
-  const { listings, t } = useStore();
+  const { listings, isMine, t } = useStore();
   const STATUS_TABS: { id: ListingStatus | 'all'; title: string }[] = [
     { id: 'active', title: t.profile.active },
     { id: 'sold', title: t.myListings.sold },
     { id: 'all', title: t.common.all },
   ];
   const [tab, setTab] = useState<ListingStatus | 'all'>('active');
-  const data = listings.filter((l) => l.sellerId === 'me' && (tab === 'all' || l.status === tab));
+  const data = listings.filter((l) => isMine(l) && (tab === 'all' || l.status === tab));
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ flexDirection: 'row', padding: space(4) }}>
@@ -159,7 +184,7 @@ export function MyListingsScreen({ navigation }: ScreenProps<'MyListings'>) {
             <ListingRow listing={item} showEvent onPress={() => navigation.navigate('Listing', { id: item.id })} />
             <View style={st.listingMeta}>
               <Text style={st.metaText}><Ionicons name="eye-outline" size={12} /> {t.myListings.views(item.views)}</Text>
-              <Badge text={item.status === 'active' ? t.myListings.onSale : item.status === 'sold' ? t.common.sold : t.myListings.draft} color={item.status === 'active' ? colors.green : colors.textDim} />
+              <Badge text={item.status === 'active' ? t.myListings.onSale : item.status === 'sold' ? t.common.sold : t.myListings.closed} color={item.status === 'active' ? colors.green : colors.textDim} />
             </View>
           </View>
         )}
@@ -174,7 +199,12 @@ export function MyListingsScreen({ navigation }: ScreenProps<'MyListings'>) {
 }
 
 export function PurchasesScreen({ navigation }: ScreenProps<'Purchases'>) {
-  const { requests, listings, listingView, t } = useStore();
+  const { requests, listingView, t } = useStore();
+  const STATUS: Record<RequestStatus, { text: string; color: string }> = {
+    processing: { text: t.request.processing, color: colors.accent },
+    done: { text: t.request.done, color: colors.green },
+    cancelled: { text: t.request.cancelled, color: colors.textDim },
+  };
   return (
     <FlatList
       style={{ flex: 1, backgroundColor: colors.bg }}
@@ -182,8 +212,7 @@ export function PurchasesScreen({ navigation }: ScreenProps<'Purchases'>) {
       data={requests}
       keyExtractor={(p) => p.id}
       renderItem={({ item }) => {
-        const l = listings.find((x) => x.id === item.listingId);
-        if (!l) return null;
+        const l = item.listing;
         const e = listingView(l);
         return (
           <View style={st.ticket}>
@@ -195,7 +224,7 @@ export function PurchasesScreen({ navigation }: ScreenProps<'Purchases'>) {
               {e.venue && <Text style={st.ticketInfo}>{e.venue}</Text>}
               <Text style={st.ticketInfo}>{l.sector}{l.row ? `, ${t.common.rowLower(l.row)}` : ''} · {t.common.pcs(item.qty)}</Text>
               <View style={st.ticketFoot}>
-                <Badge text={t.request.processing} color={colors.accent} />
+                <Badge text={STATUS[item.status].text} color={STATUS[item.status].color} />
                 <Text style={st.ticketPrice}>{formatPrice(item.total)}</Text>
               </View>
             </View>
@@ -240,7 +269,17 @@ export function LoginScreen({ navigation }: ScreenProps<'Login'>) {
 }
 
 const st = StyleSheet.create({
-  legalLink: { color: colors.textDim, fontSize: 13, textDecorationLine: 'underline' },
+  guestHero: { alignItems: 'center', paddingHorizontal: space(6), marginBottom: space(6) },
+  guestMark: { width: 96, height: 96, borderRadius: 28, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginBottom: space(5) },
+  guestMarkImg: { width: 60, height: 42, resizeMode: 'contain' },
+  guestTitle: { color: colors.text, fontSize: 26, fontWeight: '900', textAlign: 'center' },
+  guestText: { color: colors.textDim, fontSize: 15, lineHeight: 21, textAlign: 'center', marginTop: space(2) },
+  perks: { marginHorizontal: space(4), marginBottom: space(5), padding: space(4), backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border },
+  perk: { flexDirection: 'row', alignItems: 'center', marginBottom: space(4) },
+  perkIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.accent + '1F', alignItems: 'center', justifyContent: 'center' },
+  perkText: { color: colors.text, fontSize: 15, fontWeight: '600', flex: 1, marginLeft: space(3), lineHeight: 20 },
+  guestHint: { color: colors.textMuted, fontSize: 13, textAlign: 'center', marginTop: space(3) },
+  menuValue: { color: colors.textDim, fontSize: 15, marginRight: 6 },
   backdrop: { flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.surface, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, padding: space(5), paddingBottom: space(10) },
   sheetTitle: { color: colors.text, fontSize: 20, fontWeight: '800', marginBottom: space(3) },

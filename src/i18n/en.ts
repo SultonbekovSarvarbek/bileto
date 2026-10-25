@@ -9,6 +9,8 @@ const en: Dict = {
   weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 
   common: {
+    networkError: 'Cannot reach the server. Check your connection and try again.',
+    retry: 'Retry',
     cancel: 'Cancel',
     yes: 'Yes',
     all: 'All',
@@ -58,6 +60,7 @@ const en: Dict = {
     promoText: 'The platform keeps every purchase transparent — all sales are monitored.',
     fresh: 'New listings',
     freshEmpty: 'Nothing yet — be the first seller',
+    feedError: 'Could not load listings',
     nothing: 'Nothing found — try another search',
     city: 'City',
   },
@@ -74,14 +77,13 @@ const en: Dict = {
 
   listing: {
     deleted: 'Listing removed',
-    reserved: 'Reserved',
     row: 'Row',
     seats: 'Seats',
     available: 'Available',
     transfer: 'Handover',
     perTicket: 'per ticket',
     you: 'You',
-    sellerMeta: (rating, deals, since) => `★ ${rating} · ${deals} ${s(deals, 'deal', 'deals')} · since ${since}`,
+    sellerMeta: (since) => `on Bileto since ${since}`,
     verified: 'Verified',
     safeTitle: 'How buying works. ',
     safeText: "Send a request — a Bileto operator will call you, check the ticket and arrange the deal with the seller. Payment happens outside the app, after the operator's call.",
@@ -110,6 +112,8 @@ const en: Dict = {
     sentText: (phone) => `Your request is being processed. A Bileto operator will call you at ${phone}.`,
     ok: 'Got it',
     processing: 'Processing',
+    done: 'Purchased',
+    cancelled: 'Cancelled',
   },
 
   done: {
@@ -157,7 +161,10 @@ const en: Dict = {
     switchRoleQ: 'Change role?',
     switchRoleText: (role) => `Your role will be: ${role}`,
     cabinet: 'My account',
-    loginPrompt: 'Log in to sell tickets, track purchases and receive payouts',
+    loginPrompt: 'Log in to sell tickets and track your requests',
+    perks: ['Buy tickets to sold-out events', 'Sell spare tickets in a couple of minutes', 'Every deal is checked by a Bileto operator'],
+    loginCta: 'Log in or sign up',
+    loginHint: 'No SMS — just your name and phone number',
     messages: 'Messages',
     messagesText: 'Chats with buyers and sellers.',
     notifications: 'Notifications',
@@ -167,7 +174,6 @@ const en: Dict = {
     verificationText: 'Verify your identity with MyID to get the “Verified” badge and more trust from buyers.',
     language: 'Language',
     active: 'Active',
-    earned: 'Earned',
     logout: 'Log out',
   },
 
@@ -175,7 +181,7 @@ const en: Dict = {
     sold: 'Sold',
     views: (n) => `${n} ${s(n, 'view', 'views')}`,
     onSale: 'On sale',
-    draft: 'Draft',
+    closed: 'Removed',
     empty: 'Nothing here',
     emptyText: "Can't make it to the concert? Sell your ticket to someone who missed out.",
   },
