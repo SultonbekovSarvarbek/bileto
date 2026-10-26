@@ -175,6 +175,9 @@ const ru = {
     language: 'Язык',
     active: 'Активные',
     logout: 'Выйти',
+    deleteAccount: 'Удалить аккаунт',
+    deleteAccountQ: 'Удалить аккаунт?',
+    deleteAccountText: 'Имя и номер телефона будут удалены, активные объявления сняты с продажи. Отменить это нельзя.',
   },
 
   myListings: {

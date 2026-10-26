@@ -19,7 +19,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 export function ProfileTab() {
   const nav = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
-  const { user, logout, setRole, listings, requests, isMine, t } = useStore();
+  const { user, logout, deleteAccount, setRole, listings, requests, isMine, t } = useStore();
   const [langOpen, setLangOpen] = useState(false);
 
   if (!user) {
@@ -126,6 +126,12 @@ export function ProfileTab() {
 
       <Pressable onPress={logout} style={st.logout}>
         <Text style={{ color: colors.red, fontWeight: '700' }}>{t.profile.logout}</Text>
+      </Pressable>
+      <Pressable
+        onPress={() => confirm(t.profile.deleteAccountQ, t.profile.deleteAccountText, () => deleteAccount().catch((e) => notify(errorText(e, t))))}
+        style={st.deleteAccount}
+      >
+        <Text style={{ color: colors.textMuted, fontSize: 13 }}>{t.profile.deleteAccount}</Text>
       </Pressable>
       <LanguageSheet visible={langOpen} onClose={() => setLangOpen(false)} />
     </ScrollView>
@@ -302,6 +308,7 @@ const st = StyleSheet.create({
   menuBadge: { backgroundColor: colors.accent, borderRadius: 10, paddingHorizontal: 7, paddingVertical: 1, marginRight: 8 },
   menuBadgeText: { color: colors.accentText, fontSize: 12, fontWeight: '800' },
   logout: { alignItems: 'center', padding: space(6) },
+  deleteAccount: { alignItems: 'center', paddingBottom: space(6), marginTop: -space(3) },
   listingMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: space(5), marginTop: -space(2), marginBottom: space(4) },
   metaText: { color: colors.textMuted, fontSize: 12 },
   ticket: { borderRadius: radius.lg, overflow: 'hidden', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, marginBottom: space(4) },

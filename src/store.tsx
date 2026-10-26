@@ -33,6 +33,7 @@ type Store = {
   login: (name: string, phone: string, role: Role) => Promise<void>;
   setRole: (role: Role) => Promise<void>;
   logout: () => void;
+  deleteAccount: () => Promise<void>;
   city: string;
   setCity: (c: string) => void;
   feed: { loading: boolean; error: boolean };
@@ -208,6 +209,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setUser(toUser(me));
     },
     logout: signOut,
+    // Бэкенд стирает имя и телефон и снимает объявления — убираем их и из ленты.
+    deleteAccount: async () => {
+      await api.deleteMe();
+      signOut();
+      await applyFeed(api.feed(city));
+    },
     city,
     setCity: (c) => {
       if (c === city) return;
@@ -269,7 +276,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (!e) return { title: l.title, image: cover };
       return { title: e.title, image: cover ?? e.image, date: e.date, venue: VENUES.find((v) => v.id === e.venueId)?.name, eventId: e.id };
     },
-  }), [lang, ready, user, city, feed, refreshFeed, listings, sellers, favorites, requests, upsert, loadAccount, signOut]);
+  }), [lang, ready, user, city, feed, refreshFeed, applyFeed, listings, sellers, favorites, requests, upsert, loadAccount, signOut]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

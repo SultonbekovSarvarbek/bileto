@@ -168,6 +168,9 @@ const uz: Dict = {
     language: 'Тил',
     active: 'Фаол',
     logout: 'Чиқиш',
+    deleteAccount: 'Аккаунтни ўчириш',
+    deleteAccountQ: 'Аккаунт ўчирилсинми?',
+    deleteAccountText: 'Исмингиз ва телефон рақамингиз ўчирилади, фаол эълонлар сотувдан олинади. Буни бекор қилиб бўлмайди.',
   },
 
   myListings: {

@@ -169,6 +169,9 @@ const en: Dict = {
     language: 'Language',
     active: 'Active',
     logout: 'Log out',
+    deleteAccount: 'Delete account',
+    deleteAccountQ: 'Delete account?',
+    deleteAccountText: 'Your name and phone number will be erased and active listings taken down. This cannot be undone.',
   },
 
   myListings: {
