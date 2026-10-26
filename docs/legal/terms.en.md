@@ -2,7 +2,7 @@
 
 Version dated [DD.MM.YYYY]
 
-This agreement governs the relationship between [Legal entity name], TIN [TIN], address: [address] (hereinafter "Bileto", "we"), and users of the Bileto mobile application and website (hereinafter the "Service").
+This agreement governs the relationship between YODDA LLC, TIN 312338727, address: [address] (hereinafter "Bileto", "we"), and users of the Bileto mobile application and website (hereinafter the "Service").
 
 By registering, posting a listing or submitting a request, you confirm that you have read and accept this agreement and the Privacy Policy.
 
@@ -108,7 +108,7 @@ By registering, posting a listing or submitting a request, you confirm that you 
 
 ## 10. Contacts
 
-[Legal entity name], TIN [TIN]
+YODDA LLC, TIN 312338727
 Address: [address]
 Email: [support@bileto.uz]
 Phone: [+998 ...]

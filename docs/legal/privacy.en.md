@@ -2,7 +2,7 @@
 
 Version dated [DD.MM.YYYY]
 
-This policy describes what data [Legal entity name], TIN [TIN], address: [address] (hereinafter "Bileto", "we") collects in the Bileto mobile application and website, why, and to whom we transfer it.
+This policy describes what data YODDA LLC, TIN 312338727, address: [address] (hereinafter "Bileto", "we") collects in the Bileto mobile application and website, why, and to whom we transfer it.
 
 We process personal data in accordance with the Law of the Republic of Uzbekistan "On Personal Data". By using the Service, you consent to the processing of your data on the terms of this policy.
 
@@ -80,7 +80,7 @@ We may update the policy. We will notify you of material changes in the applicat
 
 ## 9. Contacts
 
-[Legal entity name], TIN [TIN]
+YODDA LLC, TIN 312338727
 Address: [address]
 Email: [privacy@bileto.uz]
 Phone: [+998 ...]
