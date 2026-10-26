@@ -111,5 +111,5 @@
 «YODDA» МЧЖ, СТИР 312338727
 Манзил: [манзил]
 Email: [support@bileto.uz]
-Телефон: [+998 ...]
+Телефон: +998 94 044 45 81
 Telegram: @s_sarvar (https://t.me/s_sarvar)
