@@ -113,7 +113,9 @@ function listingForm(fields: Partial<ListingInput>, proofUri?: string) {
 }
 
 export const api = {
-  login: (name: string, phone: string, role: ApiRole) => request<{ token: string; user: ApiUser }>('POST', '/auth/login', { name, phone, role }),
+  register: (name: string, phone: string, password: string, role: ApiRole) =>
+    request<{ token: string; user: ApiUser }>('POST', '/auth/register', { name, phone, password, role }),
+  login: (phone: string, password: string) => request<{ token: string; user: ApiUser }>('POST', '/auth/login', { phone, password }),
   me: () => request<ApiUser>('GET', '/me'),
   deleteMe: () => request<void>('DELETE', '/me'),
   updateMe: (patch: Partial<Pick<ApiUser, 'name' | 'role' | 'lang'>>) => request<ApiUser>('PATCH', '/me', patch),

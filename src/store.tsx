@@ -30,7 +30,8 @@ type Store = {
   t: Dict;
   ready: boolean; // сессия восстановлена из хранилища
   user: User | null;
-  login: (name: string, phone: string, role: Role) => Promise<void>;
+  register: (name: string, phone: string, password: string, role: Role) => Promise<void>;
+  login: (phone: string, password: string) => Promise<void>;
   setRole: (role: Role) => Promise<void>;
   logout: () => void;
   deleteAccount: () => Promise<void>;
@@ -156,6 +157,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setRequests(reqs.map(toRequest));
   }, [upsert]);
 
+  // После регистрации или входа: сохраняем токен и подтягиваем аккаунт.
+  const startSession = useCallback(async (res: { token: string; user: ApiUser }) => {
+    setToken(res.token);
+    await tokenStorage.set(res.token).catch(() => undefined);
+    setUser(toUser(res.user));
+    void api.updateMe({ lang }).catch(() => undefined);
+    // Сердечки, поставленные до входа, сохраняем в аккаунт.
+    await Promise.all(favorites.map((id) => api.addFavorite(id).catch(() => undefined)));
+    await loadAccount().catch(() => undefined);
+  }, [lang, favorites, loadAccount]);
+
   const signOut = useCallback(() => {
     setToken(null);
     void tokenStorage.clear().catch(() => undefined);
@@ -194,15 +206,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     t: DICTS[lang],
     ready,
     user,
-    login: async (name, phone, role) => {
-      const res = await api.login(name, phone, role === 'seller' ? 'SELLER' : 'BUYER');
-      setToken(res.token);
-      await tokenStorage.set(res.token).catch(() => undefined);
-      setUser(toUser(res.user));
-      void api.updateMe({ lang }).catch(() => undefined);
-      // Сердечки, поставленные до входа, сохраняем в аккаунт.
-      await Promise.all(favorites.map((id) => api.addFavorite(id).catch(() => undefined)));
-      await loadAccount().catch(() => undefined);
+    register: async (name, phone, password, role) => {
+      await startSession(await api.register(name, phone, password, role === 'seller' ? 'SELLER' : 'BUYER'));
+    },
+    login: async (phone, password) => {
+      await startSession(await api.login(phone, password));
     },
     setRole: async (role) => {
       const me = await api.updateMe({ role: role === 'seller' ? 'SELLER' : 'BUYER' });
@@ -276,7 +284,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (!e) return { title: l.title, image: cover };
       return { title: e.title, image: cover ?? e.image, date: e.date, venue: VENUES.find((v) => v.id === e.venueId)?.name, eventId: e.id };
     },
-  }), [lang, ready, user, city, feed, refreshFeed, applyFeed, listings, sellers, favorites, requests, upsert, loadAccount, signOut]);
+  }), [lang, ready, user, city, feed, refreshFeed, applyFeed, listings, sellers, favorites, requests, upsert, startSession, signOut]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

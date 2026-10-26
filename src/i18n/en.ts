@@ -158,7 +158,7 @@ const en: Dict = {
     loginPrompt: 'Log in to sell tickets and track your requests',
     perks: ['Buy tickets to sold-out events', 'Sell spare tickets in a couple of minutes', 'Every deal is checked by a Bileto operator'],
     loginCta: 'Log in or sign up',
-    loginHint: 'No SMS — just your name and phone number',
+    loginHint: 'With your phone number and password',
     messages: 'Messages',
     messagesText: 'Chats with buyers and sellers.',
     notifications: 'Notifications',
@@ -205,7 +205,7 @@ const en: Dict = {
   },
   register: {
     title: 'Sign up',
-    sub: 'Your name, phone number and who you are on Bileto',
+    sub: 'Your name, phone number, password and who you are on Bileto',
     name: 'Your name',
     namePh: 'How should we address you',
     phone: 'Phone number',
@@ -215,6 +215,13 @@ const en: Dict = {
     buyerHint: 'I buy tickets',
     sellerHint: 'I sell my tickets',
     submit: 'Continue',
+    password: 'Password',
+    passwordHint: 'At least 6 characters',
+    loginTitle: 'Log in',
+    loginSub: 'Phone number and password',
+    loginSubmit: 'Log in',
+    toLogin: 'Already have an account? Log in',
+    toRegister: 'No account? Sign up',
   },
 };
 
