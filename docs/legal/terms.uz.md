@@ -112,3 +112,4 @@
 Манзил: [манзил]
 Email: [support@bileto.uz]
 Телефон: [+998 ...]
+Telegram: @s_sarvar (https://t.me/s_sarvar)

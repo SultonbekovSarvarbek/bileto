@@ -84,3 +84,4 @@ YODDA LLC, TIN 312338727
 Address: [address]
 Email: [privacy@bileto.uz]
 Phone: [+998 ...]
+Telegram: @s_sarvar (https://t.me/s_sarvar)
